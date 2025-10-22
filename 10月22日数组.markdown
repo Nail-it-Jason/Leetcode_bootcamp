@@ -1,0 +1,143 @@
+#### 704. 二分查找
+
+闭区间版本：
+
+```c++
+class Solution {
+public:
+    int search(vector<int>& nums, int target) {
+        int start = 0, end = nums.size() - 1, mid;
+        while(start <= end){
+            mid = (start + end) / 2;
+            if(target < nums[mid])
+                end = mid - 1;
+            else if(target > nums[mid])
+                start = mid + 1;
+            else return mid;
+        }
+        return -1;
+    }
+};
+```
+
+闭区间要点：while是小于等于，因为等于仍然合法。
+
+开区间版本：
+
+```c++
+class Solution {
+public:
+    int search(vector<int>& nums, int target) {
+        int start = 0, end = nums.size(), mid;
+        while(start < end){
+            mid = (start + end) / 2;
+            if(target < nums[mid])
+                end = mid;
+            else if(target > nums[mid])
+                start = mid + 1;
+            else return mid;
+        }
+        return -1;
+    }
+};
+```
+
+开区间要点：1.start和end注意范围应该符合左闭右开。2.while条件注意，带等以后不合法了3.由于右边是开区间，end=mid实际上已经把mid排除掉了
+
+#### 27.移除元素
+
+暴力版：
+
+```c++
+class Solution {
+public:
+    // 返回不等于val的个数，将数组等于val的全去掉，暴力
+    int removeElement(vector<int>& nums, int val) {
+        int size = nums.size();
+        for(int i = 0; i < size; ++i){
+            if(nums[i] == val){
+                for(int j = i; j < size - 1; ++j)
+                    nums[j] = nums[j + 1];
+                --size;
+                --i;
+            }
+        }
+        return size;
+    }
+};
+```
+
+要点：--size让每一次向前移动数组元素，总大小减小，--i因为此时的i指向的是原先的“下一个元素”，不回退的话下次循环会略过这个值
+
+快慢指针版：
+
+```c++
+class Solution {
+public:
+    // 快指针指向的是不含val的位置，慢指针指向的是要修改的位置
+    int removeElement(vector<int>& nums, int val) {
+        int fast = 0, slow = 0, size = nums.size();
+        for(; fast != size; ++fast){
+            if(nums[fast] != val)
+                nums[slow++] = nums[fast];
+        }
+        return slow;
+    }
+};
+```
+
+要点：快指针跑全程，不等于val的时候一起更新，等于val的时候只有fast移动略过
+
+#### 977.有序数组的平方
+
+快慢指针自己实现版：
+
+```c++
+class Solution {
+public:
+    vector<int> sortedSquares(vector<int>& nums) {
+        int begin = 0, size = nums.size(), end = size - 1;
+        int pos = size - 1;
+        vector<int> result(size, 0);
+        while(begin <= end){
+            if(nums[begin]*nums[begin] < nums[end]*nums[end]){
+                result[pos--] = nums[end]*nums[end];
+                --end;
+            }
+            else{
+                result[pos--] = nums[begin]*nums[begin];
+                ++begin;
+            }
+        }
+        return result;
+    }
+};
+```
+
+要点：这种情况下的快慢指针是从两边到中间，因为最大值只可能在两边，然后依次比较、移动即可。
+
+快慢指针参考答案版：
+
+```c++
+class Solution {
+public:
+    vector<int> sortedSquares(vector<int>& A) {
+        int k = A.size() - 1;
+        vector<int> result(A.size(), 0);
+        for (int i = 0, j = A.size() - 1; i <= j;) { // 注意这里要i <= j，因为最后要处理两个元素
+            if (A[i] * A[i] < A[j] * A[j])  {
+                result[k--] = A[j] * A[j];
+                j--;
+            }
+            else {
+                result[k--] = A[i] * A[i];
+                i++;
+            }
+        }
+        return result;
+    }
+};
+
+```
+
+要点：在for循环同时操作i和j，和while循环实际上等价。
