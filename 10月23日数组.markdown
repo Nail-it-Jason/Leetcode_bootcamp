@@ -1,0 +1,112 @@
+#### 209.长度最小的子数组
+
+滑动窗口：
+
+```c++
+class Solution {
+public:
+    int minSubArrayLen(int target, vector<int>& nums) {
+        int i = 0; //起始位置
+        int sum = 0; //和
+        int window = 0; //窗口长度
+        int result = INT32_MAX; //记录
+        for(int j = 0; j < nums.size(); ++j){ //终止位置
+            sum += nums[j]; //一开始先往后加直到和超过
+            while(sum >= target){ //此时的j已经到达位置，开始移动i
+                window = j - i + 1; //记录窗口长度
+                result = result < window ? result : window;
+                sum -= nums[i++];
+            }
+        }
+        return result == INT32_MAX ? 0 : result;
+    }
+};
+```
+
+要点：定义起始位置、用于提交的结果长度、窗口长度以及sum。在for循环里定义终止位置，首先一直往后过j直到满足sum再在while循环里开始移动i，记录当前窗口长度、决定是否更新最终结果、然后i前移并扣除sum。换言之，如果j已经达到满足sum的位置了，那么我们为了新的结果一定要移动i至少一次：首先记录当前这个合法的窗口大小然后试图更新结果，然后至少移动一次i，最终使得i的现状不再满足sum，这样我们下一次for循环可以再接着去移动j。
+
+#### 59.螺旋矩阵II
+
+自己实现版：
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> generateMatrix(int n) {
+        vector<vector<int>> ans(n, vector<int>(n ,0));
+        int i = 0, j = 0, start = 0, end = n - 1, num = 1;
+        while(start < end){
+            //横向写入
+            while(j < end) ans[i][j++] = num++;
+            //右上到右下
+            while(i < end) ans[i++][j] = num++;
+            //右下到左下
+            while(j > start) ans[i][j--] = num++;
+            //左下到左上
+            while(i > start) ans[i--][j] = num++;
+            i++; j++; end--; start++;
+        }
+        if(start == end)
+            ans[i][j] = num;
+        return ans;
+    }
+};
+```
+
+要点：i和j是移动的光标，start和end用来框住四条边形成的方框，我们每一次都是左闭右开，直到要么start==end表示最终中间剩一个，或者start\==end+1这种，中间不剩。如果中间剩一个就补上中间这个。
+
+参考答案版：
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> generateMatrix(int n) {
+        vector<vector<int>> res(n, vector<int>(n, 0)); // 使用vector定义一个二维数组
+        int startx = 0, starty = 0; // 定义每循环一个圈的起始位置
+        int loop = n / 2; // 每个圈循环几次，例如n为奇数3，那么loop = 1 只是循环一圈，矩阵中间的值需要单独处理
+        int mid = n / 2; // 矩阵中间的位置，例如：n为3， 中间的位置就是(1，1)，n为5，中间位置为(2, 2)
+        int count = 1; // 用来给矩阵中每一个空格赋值
+        int offset = 1; // 需要控制每一条边遍历的长度，每次循环右边界收缩一位
+        int i,j;
+        while (loop --) {
+            i = startx;
+            j = starty;
+
+            // 下面开始的四个for就是模拟转了一圈
+            // 模拟填充上行从左到右(左闭右开)
+            for (j; j < n - offset; j++) {
+                res[i][j] = count++;
+            }
+            // 模拟填充右列从上到下(左闭右开)
+            for (i; i < n - offset; i++) {
+                res[i][j] = count++;
+            }
+            // 模拟填充下行从右到左(左闭右开)
+            for (; j > starty; j--) {
+                res[i][j] = count++;
+            }
+            // 模拟填充左列从下到上(左闭右开)
+            for (; i > startx; i--) {
+                res[i][j] = count++;
+            }
+
+            // 第二圈开始的时候，起始位置要各自加1， 例如：第一圈起始位置是(0, 0)，第二圈起始位置是(1, 1)
+            startx++;
+            starty++;
+
+            // offset 控制每一圈里每一条边遍历的长度
+            offset += 1;
+        }
+
+        // 如果n为奇数的话，需要单独给矩阵最中间的位置赋值
+        if (n % 2) {
+            res[mid][mid] = count;
+        }
+        return res;
+    }
+};
+
+```
+
+要点：直接贴过来了，思想差不多，变量选取有所不同。
+
