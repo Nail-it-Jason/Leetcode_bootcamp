@@ -1,0 +1,221 @@
+#### 203.移除链表元素
+
+自己实现版：
+
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* removeElements(ListNode* head, int val) {
+        ListNode* node = new ListNode(0, head); //哑节点
+        ListNode* pos = node; //游标
+        while(pos->next != nullptr){
+            if(pos->next->val == val){
+                ListNode *disp = pos->next;
+                pos->next = pos->next->next;
+                delete disp;
+            }
+            else pos = pos->next;
+        }
+        return node->next;
+    }
+};
+```
+
+要点：初始化问题困扰了很久，一开始尝试使用```ListNode* node(0, head);```但是编译错误，因为我用0和head实际上初始化了一个指针。后来尝试使用```ListNode* node = (0, head)```这时候编译通过了，但是运行有问题，因为这实际上是逗号运算符，只有head起作用，所以哑节点实际上是头节点。正确的方法还是用new
+
+参考答案版：
+
+非统一版：
+
+```c++
+class Solution {
+public:
+    ListNode* removeElements(ListNode* head, int val) {
+        // 删除头结点
+        while (head != NULL && head->val == val) { // 注意这里不是if
+            ListNode* tmp = head;
+            head = head->next;
+            delete tmp;
+        }
+
+        // 删除非头结点
+        ListNode* cur = head;
+        while (cur != NULL && cur->next!= NULL) {
+            if (cur->next->val == val) {
+                ListNode* tmp = cur->next;
+                cur->next = cur->next->next;
+                delete tmp;
+            } else {
+                cur = cur->next;
+            }
+        }
+        return head;
+    }
+};
+
+```
+
+要点：首先删除所有可能等于val的head，也就是第一个元素是val的。所以用while，我们直接移位即可。然后val就只可能出现在第二个元素了。下半部分和本人实现一致。
+
+统一版：
+
+```c++
+class Solution {
+public:
+    ListNode* removeElements(ListNode* head, int val) {
+        ListNode* dummyHead = new ListNode(0); // 设置一个虚拟头结点
+        dummyHead->next = head; // 将虚拟头结点指向head，这样方便后面做删除操作
+        ListNode* cur = dummyHead;
+        while (cur->next != NULL) {
+            if(cur->next->val == val) {
+                ListNode* tmp = cur->next;
+                cur->next = cur->next->next;
+                delete tmp;
+            } else {
+                cur = cur->next;
+            }
+        }
+        head = dummyHead->next;
+        delete dummyHead;
+        return head;
+    }
+};
+
+
+```
+
+要点：一个小细节就是参考答案把哑节点也删除了，这一点我没有考虑到。
+
+#### 707.设计链表
+
+看了一下参考答案实现的版本：
+
+```c++
+class MyLinkedList {
+public:
+    struct MyLinkedListNode{
+        int val;
+        MyLinkedListNode *next;
+        MyLinkedListNode(int val):val(val), next(nullptr){}
+    };
+    MyLinkedList() {
+        //建立哑节点
+        dumHead = new MyLinkedListNode(0);
+        size = 0;
+    }
+    
+    int get(int index) { //这里应该默认链表非空
+        if(index >= size || index < 0) return -1;
+        MyLinkedListNode *pos = dumHead->next;
+        while(index--) pos = pos->next;
+        return pos->val;
+    }
+    
+    void addAtHead(int val) {
+        MyLinkedListNode *node = new MyLinkedListNode(val);
+        node->next = dumHead->next;
+        dumHead->next = node;
+        ++size;
+    }
+    
+    void addAtTail(int val) {
+        MyLinkedListNode *pos = dumHead;
+        MyLinkedListNode *node = new MyLinkedListNode(val);
+        while(pos->next != nullptr){
+            pos = pos->next;
+        }
+        pos->next = node;
+        ++size;
+    }
+    
+    void addAtIndex(int index, int val) {
+        if(index >= 0 && index <= size){
+            if(index == size){
+                addAtTail(val);
+                return;
+            }
+            MyLinkedListNode *pos = dumHead;
+            MyLinkedListNode *node = new MyLinkedListNode(val);
+            while(index--){
+                pos = pos->next;
+            }
+            node->next = pos->next;
+            pos->next = node;
+            ++size;
+        }
+    }
+    
+    void deleteAtIndex(int index) {
+        if(size == 0) return;
+        if(index >= 0 && index < size){ //合法索引
+            //保存上一个节点用来删除
+            MyLinkedListNode *pos = dumHead;
+            while(index--){ //扫描到index的前一个位置
+                pos = pos->next;
+            }
+            MyLinkedListNode *tmp = pos->next;
+            pos->next = tmp->next;
+            delete tmp;
+            --size;
+        }
+    }
+private:
+int size;
+MyLinkedListNode *dumHead;
+};
+
+/**
+ * Your MyLinkedList object will be instantiated and called as such:
+ * MyLinkedList* obj = new MyLinkedList();
+ * int param_1 = obj->get(index);
+ * obj->addAtHead(val);
+ * obj->addAtTail(val);
+ * obj->addAtIndex(index,val);
+ * obj->deleteAtIndex(index);
+ */
+```
+
+要点：我们需要判断一下我们最后停在index的位置还是index前面的位置，如果是停在index前面的位置，那么就从dumHead开始遍历。然后不要忘了加或减size。再一个就是如果我们确定索引合法了以后就不用验证指针是否非空了，只需要在index内都是安全的。这样基本就问题不大了，等到后续可以再重写一下。
+
+#### 206.反转链表
+
+自己实现版：
+
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* reverseList(ListNode* head) {
+        ListNode* i = nullptr; //慢指针
+        ListNode* j = head; //快指针
+        while(j != nullptr){
+            ListNode* tmp = j->next;
+            j->next = i;
+            i = j;
+            j = tmp;
+        }
+        return i;
+    }
+};
+```
+
+要点：好好想明白while循环内部操作的顺序，首先存j的下一个，然后改变j的指向，然后更新i，更新j。想明白顺序就问题不大了。其他方法时间关系后面再刷的时候再看。
