@@ -1,0 +1,219 @@
+#### 24.两两交换链表中的节点
+
+看了视频思路后自己实现版：
+
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* swapPairs(ListNode* head) {
+        ListNode *dum = new ListNode(0, head); //虚拟头
+        ListNode *pos = dum;
+        //0个元素和一个元素的情况我们不动
+        if(pos->next == nullptr || pos->next->next == nullptr)
+            return pos->next;
+        //2个元素的链表才开始操作
+        while(pos->next != nullptr && pos->next->next != nullptr){
+            ListNode *tmp1 = pos->next;
+            ListNode *tmp2 = pos->next->next;
+            pos->next = tmp2;
+            tmp1->next = tmp2->next;
+            tmp2->next = tmp1;
+            pos = pos->next->next;
+        }
+        return dum->next;
+    }
+};
+```
+
+参考答案版：
+
+```c++
+class Solution {
+public:
+    ListNode* swapPairs(ListNode* head) {
+        ListNode* dummyHead = new ListNode(0); // 设置一个虚拟头结点
+        dummyHead->next = head; // 将虚拟头结点指向head，这样方便后面做删除操作
+        ListNode* cur = dummyHead;
+        while(cur->next != nullptr && cur->next->next != nullptr) {
+            ListNode* tmp = cur->next; // 记录临时节点
+            ListNode* tmp1 = cur->next->next->next; // 记录临时节点
+
+            cur->next = cur->next->next;    // 步骤一
+            cur->next->next = tmp;          // 步骤二
+            cur->next->next->next = tmp1;   // 步骤三
+
+            cur = cur->next->next; // cur移动两位，准备下一轮交换
+        }
+        ListNode* result = dummyHead->next;
+        delete dummyHead;
+        return result;
+    }
+};
+
+```
+
+这个版本更直接，符合正常的思路，我实际上是把步骤三和步骤二颠倒了一下，我的临时节点使用的是cur->next和cur->next->next，也通过了。
+
+#### 19.删除链表的倒数第N个节点
+
+自己实现版：
+
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* removeNthFromEnd(ListNode* head, int n) {
+        //例如题目的例子，倒数第2个节点，那慢指针要到倒数第3个位置，快指针要到最后一个位置
+        ListNode* dum = new ListNode(0, head);
+        ListNode* i = dum; //慢指针
+        ListNode* j = dum; //快指针
+        while(n--) j = j->next;
+        while(j->next != nullptr){
+            i = i->next;
+            j = j->next;
+        }
+        ListNode *tmp = i->next;
+        i->next = tmp->next;
+        delete tmp;
+        return dum->next;
+    }
+};
+```
+
+好像做过这题，大概就是先让快指针跑n个位置，然后快慢指针一起跑，这样慢指针最终会停在倒数第n个位置，然后正常删除就行。
+
+```c++
+class Solution {
+public:
+    ListNode* removeNthFromEnd(ListNode* head, int n) {
+        ListNode* dummyHead = new ListNode(0);
+        dummyHead->next = head;
+        ListNode* slow = dummyHead;
+        ListNode* fast = dummyHead;
+        while(n-- && fast != NULL) {
+            fast = fast->next;
+        }
+        fast = fast->next; // fast再提前走一步，因为需要让slow指向删除节点的上一个节点
+        while (fast != NULL) {
+            fast = fast->next;
+            slow = slow->next;
+        }
+        slow->next = slow->next->next; 
+        
+        // ListNode *tmp = slow->next;  C++释放内存的逻辑
+        // slow->next = tmp->next;
+        // delete tmp;
+        
+        return dummyHead->next;
+    }
+};
+
+```
+
+题解的区别在于第二个while它先移动了一步，然后判断fast，我没有移动，判断fast->next，感觉应该是等价的。
+
+#### 面试题02.07.链表相交
+
+自己实现版：
+
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
+       //求链表A和B的长度
+       int lenA = 0, lenB = 0;
+       ListNode *dumA = new ListNode(0, headA);
+       ListNode *dumB = new ListNode(0, headB);
+       ListNode *posA = dumA;
+       ListNode *posB = dumB;
+       while(posA->next != nullptr){
+        ++lenA;
+        posA = posA->next;
+       }
+       while(posB->next != nullptr){
+        ++lenB;
+        posB = posB->next;
+       }
+       posA = dumA; posB = dumB; int dif = lenB - lenA;
+       if(dif > 0){
+        while(dif--) posB = posB->next;
+       }
+       else if(dif < 0){
+        while(dif++) posA = posA->next;
+       }
+       while(posA && posB){
+        if(posA == posB) return posA;
+        posA = posA->next;
+        posB = posB->next;
+       }
+       return nullptr;
+    }
+};
+```
+
+思路：先测长度，然后移动到对齐，往后逐个比较。
+
+#### 142.环形链表II
+
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode *detectCycle(ListNode *head) {
+        //首先让快指针j和慢指针i相遇
+        if(head == nullptr) return head;
+        ListNode *dum = new ListNode(0, head);
+        ListNode *i = dum;
+        ListNode *j = dum;
+        while(j->next != nullptr && j->next->next != nullptr){
+            j = j->next->next;
+            i = i->next;
+            if(j == i){
+                ListNode *k = dum;
+                while(i != k){
+                    i = i->next;
+                    k = k->next;
+                }
+                return k;
+            }
+        }
+        return nullptr;
+    }
+};
+```
+
+自己没有实现出来，看了视频伪代码以后写出来了。主要注意的地方是判断的顺序，首先大while循环是基于正常的移动，在大while循环内部去写相遇的逻辑，注意一下内外的关系。
