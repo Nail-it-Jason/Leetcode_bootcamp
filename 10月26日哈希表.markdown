@@ -1,0 +1,120 @@
+#### 242.有效的字母异位词
+
+自己实现版：
+
+```c++
+class Solution {
+public:
+    bool isAnagram(string s, string t) {
+        vector<int> s_array(26, 0), t_array(26, 0);
+        for(auto &ch : s){
+            s_array[ch - 'a'] += 1;
+        }
+        for(auto &ch : t){
+            t_array[ch - 'a'] += 1;
+        }
+        return s_array == t_array;
+    }
+};
+```
+
+用一个26个字母的数组作为哈希表即可
+
+参考答案版：
+
+```c++
+class Solution {
+public:
+    bool isAnagram(string s, string t) {
+        int record[26] = {0};
+        for (int i = 0; i < s.size(); i++) {
+            // 并不需要记住字符a的ASCII，只要求出一个相对数值就可以了
+            record[s[i] - 'a']++;
+        }
+        for (int i = 0; i < t.size(); i++) {
+            record[t[i] - 'a']--;
+        }
+        for (int i = 0; i < 26; i++) {
+            if (record[i] != 0) {
+                // record数组如果有的元素不为零0，说明字符串s和t 一定是谁多了字符或者谁少了字符。
+                return false;
+            }
+        }
+        // record数组所有元素都为零0，说明字符串s和t是字母异位词
+        return true;
+    }
+};
+
+```
+
+参考答案的实现空间用的比我少了点，多了一些循环，但复杂度应该是一致的。
+
+#### 349.两个数组的交集
+
+```c++
+class Solution {
+public:
+    vector<int> intersection(vector<int>& nums1, vector<int>& nums2) {
+        unordered_set<int> s1(nums1.begin(), nums1.end());
+        unordered_set<int> s2;
+        for(int &num: nums2){
+            if(s1.find(num) != s1.end())
+                s2.insert(num);
+        }
+        return vector<int>(s2.begin(), s2.end());
+    }
+};
+```
+
+这里总结一下unordered_set的一些常用操作：insert插入新值，find寻找值，返回迭代器（如果找不到返回尾后迭代器），erase删除值，size获取大小，empty获取状态，clear清除。
+
+#### 202.快乐数
+
+```c++
+class Solution {
+public:
+    int calculate(int n){
+        int ans = 0;
+        while(n > 0){
+            int tmp = n % 10;
+            ans += (tmp * tmp);
+            n = (n - tmp) / 10;
+        }
+        return ans;
+    }
+    bool isHappy(int n) {
+        //每一次计算完看一下是不是1，在集合里查找新值，如果能找到新值代表有循环，返回false
+        unordered_set<int> s;
+        while((n = calculate(n)) != 1){
+            if(s.find(n) == s.end())
+                s.insert(n);
+            else return false;
+        }
+        return true;
+    }
+};
+```
+
+要点：要么终究会到1，要么会无限循环，因此我们在不等于1的条件下去看它会不会无限循环。跟参考答案的思路其实差不多，写法不同。
+
+#### 1.两数之和
+
+```c++
+class Solution {
+public:
+    vector<int> twoSum(vector<int>& nums, int target) {
+        //用multi_map存结果，key是数组值，value是下标
+        unordered_map<int, int> m;
+        for(int i = 0; i < nums.size(); ++i){
+            if(m.find(target - nums[i]) != m.end())
+                return vector<int>{i, m[target - nums[i]]};
+            m.insert(std::make_pair(nums[i], i));
+        }
+        return vector<int>();
+    }
+};
+```
+
+要点：我们先寻找，再插入。因为如果先插入再寻找的话，3+3=6的情况就不对了，那样我们找的3就是同一个3.
+
+参考答案和自己实现版思路基本一致，略。
