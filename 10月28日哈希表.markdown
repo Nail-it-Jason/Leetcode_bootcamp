@@ -1,0 +1,225 @@
+#### 454.四数相加II
+
+自己实现版：
+
+```c++
+class Solution {
+public:
+    int fourSumCount(vector<int>& nums1, vector<int>& nums2, vector<int>& nums3, vector<int>& nums4) {
+        int n = nums1.size();
+        int count = 0;
+        for(int i = 0; i < n; ++i)
+            for(int j = 0; j < n; ++j)
+                for(int k = 0; k < n; ++k)
+                    for(int l = 0; l < n; ++l)
+                        if(nums1[i] + nums2[j] + nums3[k] + nums4[l] == 0)
+                            count++;
+        return count;
+    }
+};
+```
+
+暴力方法$O(N^4)$超出时间限制了
+
+看参考答案思路后自己实现版：
+
+```c++
+class Solution {
+public:
+    int fourSumCount(vector<int>& nums1, vector<int>& nums2, vector<int>& nums3, vector<int>& nums4) {
+        //拆分一下，先统计AB，再遍历CD
+        unordered_map<int, int> AB;
+        for(auto &i : nums1)
+            for(auto &j : nums2)
+                ++AB[i + j];
+        int count = 0;
+        for(auto &k : nums3)
+            for(auto &l : nums4)
+                if(AB.find(- k - l) != AB.end())
+                    count += AB[- k - l];
+        return count;
+    }
+};
+```
+
+把四次方复杂度拆成了二次方的复杂度，相当于把A和B的和及其次数统计出来，然后对C和D是逐个遍历，所以可以保证结果的正确性。
+
+#### 383.赎金信
+
+自己实现版：
+
+```c++
+class Solution {
+public:
+    bool canConstruct(string ransomNote, string magazine) {
+        //基于magazine建立一个表
+        vector<int> alpha(26, 0);
+        for(auto &ch : magazine)
+            alpha[ch - 'a'] += 1;
+        for(auto &ch : ransomNote){
+            alpha[ch - 'a'] -= 1;
+            if(alpha[ch - 'a'] < 0) return false;
+        }
+        return true;
+    }
+};
+```
+
+比较简单，没什么可说的。但是看答案才晓得为什么叫赎金信😂，需要从杂志上一个一个拆字母贴上去为了不暴露字迹，笑死。
+
+#### 15.三数之和
+
+自己实现版：
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> threeSum(vector<int>& nums) {
+        //三个指针
+        set<vector<int>> ans;
+        vector<int> sorted_nums = nums;
+        std::sort(sorted_nums.begin(), sorted_nums.end());
+        for(int i = 0; i < nums.size() - 2; ++i){
+            int j = i + 1, k = nums.size() - 1;
+            while(j != k){
+                if(sorted_nums[i] + sorted_nums[j] + sorted_nums[k] > 0)
+                    --k;
+                else if(sorted_nums[i] + sorted_nums[j] + sorted_nums[k] < 0)
+                    ++j;
+                else{
+                    ans.insert(vector<int>{sorted_nums[i], sorted_nums[j],
+                    sorted_nums[k]});
+                    ++j;
+                }
+            }
+        }
+        return vector<vector<int>>(ans.begin(), ans.end());
+    }
+};
+```
+
+大概是按照答案的思路自己写的，但是有个问题，执行时间2434ms击败5%的人，应该是集合操作时间太长了。
+
+参考答案版：
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> threeSum(vector<int>& nums) {
+        vector<vector<int>> result;
+        sort(nums.begin(), nums.end());
+        // 找出a + b + c = 0
+        // a = nums[i], b = nums[left], c = nums[right]
+        for (int i = 0; i < nums.size(); i++) {
+            // 排序之后如果第一个元素已经大于零，那么无论如何组合都不可能凑成三元组，直接返回结果就可以了
+            if (nums[i] > 0) {
+                return result;
+            }
+            // 错误去重a方法，将会漏掉-1,-1,2 这种情况
+            /*
+            if (nums[i] == nums[i + 1]) {
+                continue;
+            }
+            */
+            // 正确去重a方法
+            if (i > 0 && nums[i] == nums[i - 1]) {
+                continue;
+            }
+            int left = i + 1;
+            int right = nums.size() - 1;
+            while (right > left) {
+                // 去重复逻辑如果放在这里，0，0，0 的情况，可能直接导致 right<=left 了，从而漏掉了 0,0,0 这种三元组
+                /*
+                while (right > left && nums[right] == nums[right - 1]) right--;
+                while (right > left && nums[left] == nums[left + 1]) left++;
+                */
+                if (nums[i] + nums[left] + nums[right] > 0) right--;
+                else if (nums[i] + nums[left] + nums[right] < 0) left++;
+                else {
+                    result.push_back(vector<int>{nums[i], nums[left], nums[right]});
+                    // 去重逻辑应该放在找到一个三元组之后，对b 和 c去重
+                    while (right > left && nums[right] == nums[right - 1]) right--;
+                    while (right > left && nums[left] == nums[left + 1]) left++;
+
+                    // 找到答案时，双指针同时收缩
+                    right--;
+                    left++;
+                }
+            }
+
+        }
+        return result;
+    }
+};
+
+```
+
+自己实现的判断逻辑版：
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> threeSum(vector<int>& nums) {
+        std::sort(nums.begin(), nums.end());
+        vector<vector<int>> ans;
+        for(int i = 0; i < nums.size() - 2; ++i){
+            int j = i + 1, k = nums.size() - 1;
+            if(nums[i] > 0) return ans;
+            if(i > 0 && nums[i] == nums[i - 1])
+                continue;
+            while(j < k){
+                if(nums[i] + nums[j] + nums[k] > 0)
+                    --k;
+                else if(nums[i] + nums[j] + nums[k] < 0)
+                    ++j;
+                else{
+                    ans.push_back(vector<int>{nums[i], nums[j], nums[k]});
+                    --k; ++j;
+                    while(j < k && nums[k] == nums[k + 1]) --k;
+                    while(j < k && nums[j] == nums[j - 1]) ++j;
+                }
+            }  
+        }
+        return ans;
+    }
+};
+```
+
+注意判断的顺序，首先排序，然后for循环首先固定最左侧的i，然后中间的j和右边的k从两边移动，我们当前的i如果和前面的i相同，那么得到的解一定会和前面的重合，但是我们不能预先去掉后面的相同值，因为会出现[-1, -1, 2]这种情况，如果先排除掉了就把这个解丢了。然后j和k在两端移动的时候也会出现重复值，我们在找到合法解之后，移动了j和k了，这时候如果发现和上一步的相同，那就跳过去。所以说这道题去重其实都是看**上一步**。
+
+#### 18.四数之和
+
+根据感觉自己实现版
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> fourSum(vector<int>& nums, int target) {
+        std::sort(nums.begin(), nums.end());
+        //从左到右是i, j, k, l
+        vector<vector<int>> ans;
+        if(nums.size() < 4) return ans;
+        for(int i = 0; i < nums.size() - 3; ++i){
+            if(i > 0 && nums[i] == nums[i-1]) continue;
+            for(int j = i + 1; j < nums.size() - 2; ++j){
+                if(j > i + 1 && nums[j] == nums[j-1]) continue;
+                int k = j + 1, l = nums.size() - 1;
+                while(k < l){
+                    if((long) nums[i]+nums[j]+nums[k]+nums[l]>target) --l;
+                    else if((long) nums[i]+nums[j]+nums[k]+nums[l]<target) ++k;
+                    else{
+                        ans.push_back(vector<int>{nums[i],nums[j],
+                                                nums[k],nums[l]});
+                        --l; ++k;
+                        while(k < l && nums[k] == nums[k-1]) ++k;
+                        while(k < l && nums[l] == nums[l+1]) --l;
+                    }
+                }
+            }
+        }
+        return ans;
+    }
+};
+```
+
+相比下面的参考答案，少了一点剪枝，那就是判断现在的结果是否已经比target大了，如果结果还大于0，代表后面不会再有负值了，那样的话可以直接退出循环了。感觉加了一点剪枝应该还会更快。
