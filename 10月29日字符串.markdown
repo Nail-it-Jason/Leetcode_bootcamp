@@ -1,0 +1,91 @@
+#### 344.反转字符串
+
+```c++
+class Solution {
+public:
+    void reverseString(vector<char>& s) {
+        for(int i = 0; i < s.size() / 2; ++i)
+            swap(s[i], s[s.size() - 1 - i]);
+    }
+};
+```
+
+没啥好说。答案用的双指针，但我用```i```和```s.size() - 1 - i```分别表示双指针。
+
+#### 541.反转字符串II
+
+```c++
+class Solution {
+public:
+    string reverseStr(string s, int k) {
+        for(int i = 0; i < s.size(); i += 2*k){
+            if(i + k <= s.size())
+                reverse(s.begin()+i, s.begin()+i+k);
+            else
+                reverse(s.begin()+i, s.end());
+        }
+        return s;
+    }
+};
+```
+
+注意一下情况划分，i+k<=size既蕴含了i+2k<=size的情况，又蕴含了i+2k>size的情况，我们都可以用相同的操作，于是这两种情况合并到了一起。虽然是简单题但还是需要想清楚这件事。
+
+#### 卡码网54.替换数字
+
+```c++
+#include <iostream>
+using namespace std;
+
+int main(){
+    string s;
+    cin >> s;
+    string s_ans = "";
+    for(auto &ch : s){
+        s_ans += ((ch >= '0' && ch <= '9') ? "number" : string(1, ch));
+    }
+    cout << s_ans << endl;
+}
+```
+
+注意一下三目运算符返回的结果应该相同，一开始我直接用的ch加进去不行，需要转string。
+
+```c++
+#include <iostream>
+using namespace std;
+int main() {
+    string s;
+    while (cin >> s) {
+        int sOldIndex = s.size() - 1;
+        int count = 0; // 统计数字的个数
+        for (int i = 0; i < s.size(); i++) {
+            if (s[i] >= '0' && s[i] <= '9') {
+                count++;
+            }
+        }
+        // 扩充字符串s的大小，也就是将每个数字替换成"number"之后的大小
+        s.resize(s.size() + count * 5);
+        int sNewIndex = s.size() - 1;
+        // 从后往前将数字替换为"number"
+        while (sOldIndex >= 0) {
+            if (s[sOldIndex] >= '0' && s[sOldIndex] <= '9') {
+                s[sNewIndex--] = 'r';
+                s[sNewIndex--] = 'e';
+                s[sNewIndex--] = 'b';
+                s[sNewIndex--] = 'm';
+                s[sNewIndex--] = 'u';
+                s[sNewIndex--] = 'n';
+            } else {
+                s[sNewIndex--] = s[sOldIndex];
+            }
+            sOldIndex--;
+        }
+        cout << s << endl;       
+    }
+}
+
+
+
+```
+
+这里利用了c++数组扩容的方法，然后从后往前遍历。
