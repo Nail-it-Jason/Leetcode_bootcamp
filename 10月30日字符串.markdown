@@ -1,0 +1,58 @@
+#### 151.反转字符串中的单词
+
+```c++
+class Solution {
+public:
+    void removeExtraSpaces(string &s){
+        int slow = 0, fast = 0;
+        for(; fast < s.size(); ++fast){
+            if(s[fast] != ' '){
+                if(slow != 0) s[slow++] = ' ';
+                while(fast < s.size() && s[fast] != ' '){
+                    s[slow++] = s[fast++];
+                }
+            }
+        }
+        s.resize(slow);
+    }
+    string reverseWords(string s) {
+        //先去空格，再整体反转，再逐个单词反转
+        //双指针去空格
+        removeExtraSpaces(s);
+        reverse(s.begin(), s.end());
+        auto pos_i = s.begin(), pos_j = s.begin();
+        for(; pos_j <= s.end(); ++pos_j){
+            if(pos_j == s.end() || *pos_j == ' '){
+                reverse(pos_i, pos_j);
+                ++pos_j;
+                pos_i = pos_j;
+            }
+        }
+        return s;
+    }
+};
+```
+
+这个有点难，首先是大体思路：先去空格，再整体反转，最后再每个单词反转。去空格的时候，用双指针法，每当遇到非空格的时候开始处理，通过slow的位置判断是否是第一个单词，如果不是就需要加空格，while需要检查一下越界。每个单词反转也要用双指针法。注意判断一直持续到最后一个单词，如果只是检查空格，那么会导致最后一个单词不能转回来。
+
+#### 卡码55.右旋字符串
+
+```c++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+int main(){
+    string s;
+    int k;
+    cin >> k >> s;
+    reverse(s.begin(), s.end());
+    reverse(s.begin(), s.begin()+k);
+    reverse(s.begin()+k, s.end());
+    cout << s << endl;
+}
+```
+
+想复杂了，一开始想建立双指针的。
+
+#### KMP看一下视频讲解了解一下
