@@ -1,0 +1,213 @@
+#### 232.用栈实现队列
+
+```c++
+class MyQueue {
+public:
+    MyQueue() {
+        
+    }
+    
+    void push(int x) {
+        stack_1.push(x);
+    }
+    
+    int pop() {
+        while(!stack_1.empty()){
+            stack_2.push(stack_1.top());
+            stack_1.pop();
+        }
+        int ans = stack_2.top();
+        stack_2.pop();
+        while(!stack_2.empty()){
+            stack_1.push(stack_2.top());
+            stack_2.pop();
+        }
+        return ans;
+    }
+    
+    int peek() {
+        while(!stack_1.empty()){
+            stack_2.push(stack_1.top());
+            stack_1.pop();
+        }
+        int ans = stack_2.top();
+        while(!stack_2.empty()){
+            stack_1.push(stack_2.top());
+            stack_2.pop();
+        }
+        return ans;
+    }
+    
+    bool empty() {
+        return stack_1.empty();
+    }
+private:
+    stack<int> stack_1;
+    stack<int> stack_2;
+};
+
+/**
+ * Your MyQueue object will be instantiated and called as such:
+ * MyQueue* obj = new MyQueue();
+ * obj->push(x);
+ * int param_2 = obj->pop();
+ * int param_3 = obj->peek();
+ * bool param_4 = obj->empty();
+ */
+```
+
+这里思路就是每次获得队列顶的时候，不管是peek还是pop，我们都把东西一个一个倒出来到另一个栈，这样另一个栈顶就是第一个栈底，也就是队列顶端的元素。我的实现其实有一定的问题就是没有必要倒回去。修改一下。
+
+```c++
+class MyQueue {
+public:
+    MyQueue() {
+        
+    }
+    
+    void push(int x) {
+        stack_1.push(x);
+    }
+    
+    int pop() {
+        if(stack_2.empty()){
+            while(!stack_1.empty()){
+                stack_2.push(stack_1.top());
+                stack_1.pop();
+            }
+        }
+        int ans = stack_2.top();
+        stack_2.pop();
+        return ans;
+    }
+    
+    int peek() {
+        int ans = this->pop();
+        stack_2.push(ans);
+        return ans;
+    }
+    
+    bool empty() {
+        return stack_1.empty() && stack_2.empty();
+    }
+private:
+    stack<int> stack_1;
+    stack<int> stack_2;
+};
+
+/**
+ * Your MyQueue object will be instantiated and called as such:
+ * MyQueue* obj = new MyQueue();
+ * obj->push(x);
+ * int param_2 = obj->pop();
+ * int param_3 = obj->peek();
+ * bool param_4 = obj->empty();
+ */
+```
+
+这个版本就是倒出来到另一个栈以后不倒回去，时间复杂度符合一般的队列。
+
+#### 225.用队列实现栈
+
+```c++
+class MyStack {
+public:
+    MyStack() {
+        
+    }
+    
+    void push(int x) {
+        q.push(x);
+    }
+    
+    int pop() {
+        int count = q.size();
+        while(count > 1){
+            q.push(q.front());
+            q.pop();
+            --count;
+        }
+        int ans = q.front();
+        q.pop();
+        return ans;
+    }
+    
+    int top() {
+        int count = q.size();
+        while(count > 1){
+            q.push(q.front());
+            q.pop();
+            --count;
+        }
+        int ans = q.front();
+        q.push(ans);
+        q.pop();
+        return ans;        
+    }
+    
+    bool empty() {
+        return q.empty();
+    }
+private:
+    queue<int> q;
+};
+
+/**
+ * Your MyStack object will be instantiated and called as such:
+ * MyStack* obj = new MyStack();
+ * obj->push(x);
+ * int param_2 = obj->pop();
+ * int param_3 = obj->top();
+ * bool param_4 = obj->empty();
+ */
+```
+
+#### 20.有效的括号
+
+```c++
+class Solution {
+public:
+    bool isValid(string s) {
+        stack<char> stk;
+        for(auto &ch : s){
+            if(stk.empty() && (ch == ')' || ch == ']' || ch == '}'))
+                return false;
+            else if(ch == '(') stk.push(')');
+            else if(ch == '[') stk.push(']');
+            else if(ch == '{') stk.push('}');
+            else if(ch == stk.top()) stk.pop();
+            else return false;
+        }
+        return stk.empty();
+    }
+};
+```
+
+第一个if对应的是有多余的右括号，后面4个else if是能正常添加和消除的情况，最后的else对应的一定是不合法的情况。
+
+#### 1047.删除字符串中的所有相邻重复项
+
+```c++
+class Solution {
+public:
+    string removeDuplicates(string s) {
+        string ans = "";
+        stack<char> stk;
+        for(auto ch : s){
+            if(stk.empty() || ch != stk.top()){
+                stk.push(ch);
+            }
+            else
+                stk.pop();
+        }
+        while(!stk.empty()){
+            ans.push_back(stk.top());
+            stk.pop();
+        }
+        reverse(ans.begin(), ans.end());
+        return ans;
+    }
+};
+```
+
+我包括上一题一直想的是把每个元素都放到栈里，然后两个相同的一起pop，但是最好的想法还是只push一个匹配或者对应的。
