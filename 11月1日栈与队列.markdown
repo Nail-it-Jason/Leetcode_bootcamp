@@ -1,0 +1,105 @@
+#### 150.逆波兰表达式求值
+
+```c++
+class Solution {
+public:
+    int evalRPN(vector<string>& tokens) {
+        stack<long long> stk;
+        long long operand1, operand2;
+        for(auto &s : tokens){
+            if(s == "+" ||
+               s == "-" ||
+               s == "*" ||
+               s == "/"){
+                    operand2 = stk.top();
+                    stk.pop();
+                    operand1 = stk.top();
+                    stk.pop();
+                    if(s == "+") stk.push(operand1+operand2);
+                    else if(s == "-") stk.push(operand1-operand2);
+                    else if(s == "*") stk.push(operand1*operand2);
+                    else stk.push(operand1/operand2);
+               }
+            else stk.push(stoll(s));
+        }
+        return stk.top();
+    }
+};
+```
+
+这里注意一个小点就是除法那里，除数在栈顶，被除数在栈内第二位，不要反了。另外就是统一一下栈里放整数，这样格式转换的次数会少一些。
+
+#### 239.滑动窗口最大值
+
+```c++
+class Solution {
+private:
+    class MyQueue{
+    public:
+        deque<int> que;
+        void pop(int value){
+            if(!que.empty() && que.front() == value){
+                que.pop_front();
+            }
+        }
+        void push(int value){
+            while(!que.empty() && value > que.back())
+                que.pop_back();
+            que.push_back(value);
+        }
+        int front(){
+            return que.front();
+        }
+    };
+public:
+    vector<int> maxSlidingWindow(vector<int>& nums, int k) {
+        MyQueue q;
+        vector<int> ans;
+        for(int i = 0; i < k; ++i)
+            q.push(nums[i]);
+        ans.push_back(q.front());
+        for(int i = k; i < nums.size(); ++i){
+            q.pop(nums[i-k]);
+            q.push(nums[i]);
+            ans.push_back(q.front());
+        }
+        return ans;
+    }
+};
+```
+
+这道题有点难，需要我们自己设计数据结构。我们需要设计这样一个单调队列：保证队列首是窗口中的最大值，这需要我们在每次push的时候，都先要把比当前值小的值从后面pop出来。每次pop的时候呢，只有队列顶端正好是我们想要移出的值的时候我们才从前面pop出来，否则保留。保留的时候代表的是，窗口移动要消去的值不在队列里，因为最大值不在窗口的边界。大概是这个思想，还是有点不好理解。
+
+#### 347.前K个高频元素
+
+```c++
+class Solution {
+public:
+    class mycomparison{
+    public:
+        bool operator()(const pair<int, int> &lhs, const pair<int, int> &rhs){
+            return lhs.second > rhs.second;
+        }
+    };
+    vector<int> topKFrequent(vector<int>& nums, int k) {
+        unordered_map<int, int> map;
+        for(auto &element : nums){
+            map[element]++;
+        }
+        priority_queue<pair<int, int>, vector<pair<int, int>>, mycomparison> pri_que;
+        for(auto it = map.begin(); it != map.end(); ++it){
+            pri_que.push(*it);
+            if(pri_que.size() > k)
+                pri_que.pop();
+        }
+        vector<int> ans(k, 0);
+        for(int i = k - 1; i >= 0; --i){
+            ans[i] = pri_que.top().first;
+            pri_que.pop();
+        }
+        return ans;
+    }
+};
+```
+
+这题主要不太熟悉STL，重点是比较器的定义，定义一个类，里面重载括号运算符，括号运算符定义的是比较规则：比较器返回true的含义是第一个参数的优先级更低/更弱。这块比较绕。然后是优先队列的定义，包括储存值的类型，容器类型和比较器。剩下的基本就没什么好说的。
