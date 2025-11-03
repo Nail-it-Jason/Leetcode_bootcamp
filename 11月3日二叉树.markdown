@@ -1,0 +1,164 @@
+#### 144.二叉树的前序遍历
+
+递归版本
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    void traversal(TreeNode *node, vector<int> &vec){
+        if(node == nullptr) return;
+        vec.push_back(node->val);
+        traversal(node->left, vec);
+        traversal(node->right, vec);
+    }
+    vector<int> preorderTraversal(TreeNode* root) {
+        vector<int> ans;
+        traversal(root, ans);
+        return ans;
+    }
+};
+```
+
+迭代版本
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    vector<int> preorderTraversal(TreeNode* root) {
+        vector<int> ans;
+        stack<TreeNode*> stk;
+        if(root == nullptr) return ans;
+        stk.push(root);
+        while(!stk.empty()){
+            TreeNode* node = stk.top();
+            ans.push_back(node->val);
+            stk.pop();
+            if(node->right)
+                stk.push(node->right);
+            if(node->left)
+                stk.push(node->left);
+        }
+        return ans;
+    }
+};
+```
+
+注意几个细节：首先处理空root，其次先推入根，然后每次处理栈顶元素（**设置节点，读取值，推出**），另外需要节点非空的时候才推入，**空节点不入栈，因为我们无法对空节点做进一步读取**。
+
+#### 145.二叉树的后序遍历
+
+递归版本
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    void traversal(TreeNode *node, vector<int> &vec){
+        if(node == nullptr) return;
+        traversal(node->left, vec);
+        traversal(node->right, vec);
+        vec.push_back(node->val);
+    }
+    vector<int> postorderTraversal(TreeNode* root) {
+        vector<int> ans;
+        traversal(root, ans);
+        return ans;
+    }
+};
+```
+
+#### 94.二叉树的中序遍历
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    void traversal(TreeNode *node, vector<int> &vec){
+        if(node == nullptr) return;
+        traversal(node->left, vec);
+        vec.push_back(node->val);
+        traversal(node->right, vec);
+    }
+    vector<int> inorderTraversal(TreeNode* root) {
+        vector<int> ans;
+        traversal(root, ans);
+        return ans;        
+    }
+};
+```
+
+#### 102.二叉树的层序遍历
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    void Order(vector<vector<int>> &ans, TreeNode* node, int depth){
+        if(node == nullptr) return;
+        if(ans.size() == depth) ans.push_back(vector<int>());
+        ans[depth].push_back(node->val);
+        Order(ans, node->left, depth + 1);
+        Order(ans, node->right, depth + 1);
+    }
+    vector<vector<int>> levelOrder(TreeNode* root) {
+        vector<vector<int>> ans;
+        int depth = 0;
+        Order(ans, root, depth);
+        return ans;
+    }
+};
+```
+
+要点：这里是二维数组，当这一层满了我们就开下一层。
