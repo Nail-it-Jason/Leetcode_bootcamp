@@ -1,0 +1,178 @@
+#### 110.平衡二叉树
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    int getHeight(TreeNode* node){
+        //返回-1代表此节点以下已经不是平衡的
+        //否则返回包括此节点在内的高度
+        if(node == nullptr) return 0;
+        else{
+            int a = getHeight(node->left);
+            int b = getHeight(node->right);
+            if(a == -1 || b == -1) return -1;
+            else if(abs(a - b) <= 1) return (a > b ? a+1 : b+1);
+            else return -1;
+        }
+    }
+    bool isBalanced(TreeNode* root) {
+        if(getHeight(root) == -1) return false;
+        else return true;
+    }
+};
+```
+
+这里注意一下一开始我在getHeight里面的else if这里，写的是```a-b<=1||a-b>=-1```但是这其实是不对的。绝对值应该用```&&```连接才对。
+
+参考答案：
+
+```c++
+class Solution {
+public:
+    // 返回以该节点为根节点的二叉树的高度，如果不是平衡二叉树了则返回-1
+    int getHeight(TreeNode* node) {
+        if (node == NULL) {
+            return 0;
+        }
+        int leftHeight = getHeight(node->left);
+        if (leftHeight == -1) return -1;
+        int rightHeight = getHeight(node->right);
+        if (rightHeight == -1) return -1;
+        return abs(leftHeight - rightHeight) > 1 ? -1 : 1 + max(leftHeight, rightHeight);
+    }
+    bool isBalanced(TreeNode* root) {
+        return getHeight(root) == -1 ? false : true;
+    }
+};
+
+```
+
+这个版本基本思想差不多，调整了一下代码顺序，以及压缩了一些分支语句，更加简洁。
+
+#### 257.二叉树的所有路径
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    void traversal(TreeNode* cur, vector<int>& path, vector<string>& ans){
+        //到叶子节点开始处理
+        path.push_back(cur->val);
+        if(cur->left == nullptr && cur->right == nullptr){
+            string whole_path = "";
+            for(int i = 0; i < path.size() - 1; ++i){
+                whole_path += to_string(path[i]);
+                whole_path += "->";
+            }
+            whole_path += to_string(path[path.size() - 1]);
+            ans.push_back(whole_path);
+        }
+        if(cur->left){
+            traversal(cur->left, path, ans);
+            path.pop_back();
+        }
+        if(cur->right){
+            traversal(cur->right, path, ans);
+            path.pop_back();
+        }
+    }
+    vector<string> binaryTreePaths(TreeNode* root) {
+        vector<string> ans;
+        vector<int> path;
+        if(root == nullptr) return ans;
+        traversal(root, path, ans);
+        return ans;
+    }
+};
+```
+
+基本是第一次接触回溯，掌握一下大概的框架，就是定义一个数组，到叶子的时候装入结果，其余情况就是接着往下递归，然后pop（回退）。大概就是这个框架。
+
+#### 404.左叶子之和
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    void calculate(TreeNode* node, int& sum){
+        if(node == nullptr) return;
+        if(node->left == nullptr && node->right == nullptr) return;
+        if(node->left && node->left->left == nullptr
+           && node->left->right == nullptr)
+           sum += node->left->val;
+
+        calculate(node->left, sum);
+        calculate(node->right, sum);
+    }
+    int sumOfLeftLeaves(TreeNode* root) {
+        int sum = 0;
+        calculate(root, sum);
+        return sum;
+    }
+};
+```
+
+注意一下calculate的写法，我们传入的node可能有这样的情况，叶子节点(左右都空)直接退出，倒数第二层节点(左右都满，或者左右只存在一个)。如果左右都满，那么下一步就是叶子节点。但如果左右只存在一个，下一步可能会**传入一个空指针**，我们不应该对空指针进行访问成员操作，因此需要在最前面补上这个判断。
+
+#### 222.完全二叉树的节点个数
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    void count(TreeNode* node, int& num){
+        if(node == nullptr) return;
+        ++num;
+        count(node->left, num);
+        count(node->right, num);
+    }
+    int countNodes(TreeNode* root) {
+        int num = 0;
+        count(root, num);
+        return num;
+    }
+};
+```
+
+这个题不算太难。
