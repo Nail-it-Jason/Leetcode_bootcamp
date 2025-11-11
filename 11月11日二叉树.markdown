@@ -1,0 +1,97 @@
+#### 669.修剪二叉搜索树
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* trimBST(TreeNode* root, int low, int high) {
+        if (root == nullptr) return nullptr;
+        if (root->val < low)
+            return trimBST(root->right, low, high);
+        if (root->val > high)
+            return trimBST(root->left, low, high);
+        root->left = trimBST(root->left, low, high);
+        root->right = trimBST(root->right, low, high);
+        return root;
+    }
+};
+```
+
+if进入的是修剪环节，否则直接接入左右子树。
+
+#### 108.将有序数组转换为二叉搜索树
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* traverse(vector<int>& nums, int begin, int end){
+        if (begin > end) return nullptr;
+        int div = (begin + end) / 2;
+        TreeNode* node = new TreeNode(nums[div]);
+        node->left = traverse(nums, begin, div - 1);
+        node->right = traverse(nums, div + 1, end);
+        return node;
+    }
+    TreeNode* sortedArrayToBST(vector<int>& nums) {
+        TreeNode* root = traverse(nums, 0, nums.size() - 1);
+        return root;
+    }
+};
+```
+
+注意一下递归出口begin>end
+
+#### 538.把二叉搜索树转换为累加树
+
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    int pre = 0;
+    void traversal(TreeNode* cur){
+        if(cur == nullptr) return;
+        traversal(cur->right);
+        cur->val += pre;
+        pre = cur->val;
+        traversal(cur->left);
+    }
+    TreeNode* convertBST(TreeNode* root) {
+        pre = 0;
+        traversal(root);
+        return root;
+    }
+};
+```
+
+注意pre节点。
