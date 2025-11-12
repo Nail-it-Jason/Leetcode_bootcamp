@@ -1,0 +1,164 @@
+#### 77.组合
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> ans;
+    vector<int> path;
+    void backtracking(int n, int k, int startIdx){
+        if (path.size() == k){
+            ans.push_back(path);
+            return;
+        }
+        for(int i = startIdx; i <= n; ++i){
+            path.push_back(i);
+            backtracking(n, k, i + 1);
+            path.pop_back();
+        }
+    }
+    vector<vector<int>> combine(int n, int k) {
+        ans.clear();
+        path.clear();
+        backtracking(n, k, 1);
+        return ans;
+    }
+};
+```
+
+k相当于深度，递归中当当前path到达深度就放结果。否则就根据startIdx继续往path里填数，然后再回溯。for循环的第一次可以得到所有以1为开头的结果，以此类推。
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> ans;
+    vector<int> path;
+    void backtracking(int n, int k, int startIdx){
+        if (path.size() == k){
+            ans.push_back(path);
+            return;
+        }
+        for(int i = startIdx; i <= n - (k - path.size()) + 1; ++i){
+            path.push_back(i);
+            backtracking(n, k, i + 1);
+            path.pop_back();
+        }
+    }
+    vector<vector<int>> combine(int n, int k) {
+        ans.clear();
+        path.clear();
+        backtracking(n, k, 1);
+        return ans;
+    }
+};
+```
+
+我们剪枝可以让for循环遍历次数少一点。如果我们已经在path里有一些了，那么距离目标k个数还剩k-path.size()个，那我们就不需要遍历到n了，因为无法到达n。
+
+#### 216.组合总和III
+
+照猫画虎写了一个版本但是n=45，k=9的时候超时了
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> ans;
+    vector<int> path;
+    int curSum;
+    void backtrack(int k, int n, int startIdx){
+        if(path.size() == k){
+            if(curSum == n){
+                ans.push_back(path);
+            }
+            return;
+        }
+        for(int i = startIdx; i <= n; ++i){
+            path.push_back(i);
+            curSum += i;
+            backtrack(k, n, i + 1);
+            curSum -= i;
+            path.pop_back();
+        }
+    }
+    vector<vector<int>> combinationSum3(int k, int n) {
+        curSum = 0;
+        backtrack(k, n, 1);
+        return ans;
+    }
+};
+```
+
+后来发现其实i最多到9就可以了，因为题目有要求！
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> ans;
+    vector<int> path;
+    int curSum;
+    void backtrack(int k, int n, int startIdx){
+        if(path.size() == k){
+            if(curSum == n){
+                ans.push_back(path);
+            }
+            return;
+        }
+        for(int i = startIdx; i <= 9; ++i){
+            path.push_back(i);
+            curSum += i;
+            backtrack(k, n, i + 1);
+            curSum -= i;
+            path.pop_back();
+        }
+    }
+    vector<vector<int>> combinationSum3(int k, int n) {
+        curSum = 0;
+        backtrack(k, n, 1);
+        return ans;
+    }
+};
+```
+
+这样写出来就没有超时了。属于是忽略了题目要求搜索了一堆没有必要的东西。
+
+进一步还可以剪枝就是检测当前的curSum是不是已经比n大了，比n大就直接返回。
+
+#### 17.电话号码的字母组合
+
+```c++
+class Solution {
+public:
+    vector<string> ans;
+    string path;
+    const string letterMap[10] = {
+    "", // 0
+    "", // 1
+    "abc", // 2
+    "def", // 3
+    "ghi", // 4
+    "jkl", // 5
+    "mno", // 6
+    "pqrs", // 7
+    "tuv", // 8
+    "wxyz", // 9
+    };
+    void backtrack(const string& digits, int index){
+        if(index == digits.size()){
+            ans.push_back(path);
+            return;
+        }
+        int digit = digits[index] - '0';
+        string letters = letterMap[digit];
+        for(int i = 0; i < letters.size(); ++i){
+            path.push_back(letters[i]);
+            backtrack(digits, index+1);
+            path.pop_back();
+        }
+    }
+    vector<string> letterCombinations(string digits) {
+        backtrack(digits, 0);
+        return ans;
+    }
+};
+```
+
+这道题我们需要识别一下，for循环是遍历可能性，而递归一定是要向下遍历的，所以在这种情况下遍历到下一个位数。
