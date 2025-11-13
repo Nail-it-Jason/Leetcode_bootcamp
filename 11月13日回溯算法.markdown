@@ -1,0 +1,111 @@
+#### 39.组合总和
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> ans;
+    vector<int> path;
+    int sum;
+    void backtrack(vector<int>& candidates, int target, int start){
+        if(sum > target) return;
+        if(sum == target){
+            ans.push_back(path);
+            return;
+        }
+        for(int i = start; i < candidates.size(); ++i){
+            sum += candidates[i];
+            path.push_back(candidates[i]);
+            backtrack(candidates, target, i);
+            path.pop_back();
+            sum -= candidates[i];
+        }
+    }
+    vector<vector<int>> combinationSum(vector<int>& candidates, int target) {
+        sum = 0;
+        backtrack(candidates, target, 0);
+        return ans;
+    }
+};
+```
+
+要点：这道题有个很重要的东西就是，每次开始我可以重复上一次的数据，但是不能走回头路。于是很巧妙的把i传到下一次backtrack。
+
+#### 40.组合总和II
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> result;
+    vector<int> path;
+    void backtrack(vector<int>& candidates, int target, int sum, int startIndex, vector<bool>& used){
+        if(target < sum) return;
+        if(target == sum){
+            result.push_back(path);
+            return;
+        }
+        for(int i = startIndex; i < candidates.size(); ++i){
+            if(i > 0 && candidates[i] == candidates[i-1] && used[i-1] == false)
+                continue;
+            path.push_back(candidates[i]);
+            sum += candidates[i];
+            used[i] = true;
+            backtrack(candidates, target, sum, i+1, used);
+            used[i] = false;
+            sum -= candidates[i];
+            path.pop_back();
+        }
+    }
+    vector<vector<int>> combinationSum2(vector<int>& candidates, int target) {
+        vector<bool> used(candidates.size(), false);
+        result.clear();
+        path.clear();
+        sort(candidates.begin(), candidates.end());
+        backtrack(candidates, target, 0, 0, used);
+        return result;
+    }
+};
+```
+
+这道题有点难，回溯需要考虑3个量。
+
+#### 131.分割回文串
+
+```c++
+class Solution {
+public:
+    vector<vector<string>> ans;
+    vector<string> path;
+    bool isPalindrome(const string& s, int start, int end) {
+        for (int i = start, j = end; i < j; i++, j--) {
+            if (s[i] != s[j]) {
+                return false;
+            }
+        }
+        return true;
+    }
+    void backtrack(const string& s, int start){
+        if(start >= s.size()){
+            ans.push_back(path);
+            return;
+        }
+        for(int i = start; i < s.size(); ++i){
+            if(isPalindrome(s, start, i)){
+                string str = s.substr(start, i - start + 1);
+                path.push_back(str);
+            }
+            else
+                continue;
+            backtrack(s, i + 1);
+            path.pop_back();
+        }
+    }
+    vector<vector<string>> partition(string s) {
+        ans.clear();
+        path.clear();
+        backtrack(s, 0);
+        return ans;
+    }
+};
+```
+
+这道题的for循环循环的是从哪里开始切割，而向下递归是进一步去切割。
