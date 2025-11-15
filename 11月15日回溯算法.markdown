@@ -1,0 +1,129 @@
+#### 491.非递减子序列
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> ans;
+    vector<int> path;
+    
+    void backtrack(vector<int>& nums, int start){
+        if(path.size() > 1){
+            ans.push_back(path);
+        }
+        unordered_set<int> uset;
+        for(int i = start; i < nums.size(); ++i){
+            if(!path.empty() && nums[i] < path.back() ||
+                uset.find(nums[i]) != uset.end())
+                continue;
+            uset.insert(nums[i]);
+            path.push_back(nums[i]);
+            backtrack(nums, i + 1);
+            path.pop_back();
+        }
+    }
+    vector<vector<int>> findSubsequences(vector<int>& nums) {
+        backtrack(nums, 0);
+        return ans;
+    }
+};
+```
+
+这道题有助于我们加深理解回溯算法。我一开始吧uset设计为整个类的成员，但是这会导致整颗树都共享uset，那我们对于输入[4, 6, 7, 7]，当顺着深度方向下探的时候，我们遇到第二个7也会跳过，这是我们不想看见的。因此把uset写在for循环外，意思是每层共享uset，这样我们不会在同一个位置重复选取数据。这里面有一点微妙的差别需要再好好考虑考虑。
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> ans;
+    vector<int> path;
+    
+    void backtrack(vector<int>& nums, int start){
+        if(path.size() > 1){
+            ans.push_back(path);
+        }
+        vector<bool> uset(201, false);
+        for(int i = start; i < nums.size(); ++i){
+            if(!path.empty() && nums[i] < path.back() ||
+                uset[nums[i]+100] == true)
+                continue;
+            uset[nums[i]+100] = true;
+            path.push_back(nums[i]);
+            backtrack(nums, i + 1);
+            path.pop_back();
+        }
+    }
+    vector<vector<int>> findSubsequences(vector<int>& nums) {
+        backtrack(nums, 0);
+        return ans;
+    }
+};
+```
+
+用以下方法可以时间换空间优化一下代码的执行时间。
+
+#### 46.全排列
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> ans;
+    vector<int> path;
+    void backtrack(vector<int>& nums, vector<bool>& used){
+        if(path.size() == nums.size()){
+            ans.push_back(path);
+            return;
+        }
+        
+        for(int i = 0; i < nums.size(); ++i){
+            if(used[i] == false){
+                path.push_back(nums[i]);
+                used[i] = true;
+            } else continue;
+            backtrack(nums, used);
+            path.pop_back();
+            used[i] = false;
+        }
+    }
+    vector<vector<int>> permute(vector<int>& nums) {
+        vector<bool> used(nums.size(), false);
+        backtrack(nums, used);
+        return ans;
+    }
+};
+```
+
+#### 47.全排列II
+
+```c++
+class Solution {
+public:
+    vector<int> path;
+    vector<vector<int>> ans;
+    void backtrack(vector<int>& nums, vector<bool>& used){
+        if(path.size() == nums.size()){
+            ans.push_back(path);
+            return;
+        }
+        for(int i = 0; i < nums.size(); ++i){
+            if(i > 0 && nums[i] == nums[i-1] && used[i-1] == false)
+                continue;
+            if(used[i] == false){
+                used[i] = true;
+                path.push_back(nums[i]);
+                backtrack(nums, used);
+                path.pop_back();
+                used[i] = false;
+            }
+        }
+    }
+    vector<vector<int>> permuteUnique(vector<int>& nums) {
+        ans.clear();
+        path.clear();
+        vector<bool> used(nums.size(), false);
+        sort(nums.begin(), nums.end());
+        backtrack(nums, used);
+        return ans;
+    }
+};
+```
+
+这道题我犯了一个非常愚蠢的错误，非常愚蠢的typo而且很难检查出来。那就是我出口处压入的本应该是path，而我写成了nums，但是脑子直接就过去了。这么小的一处错误也很难检查出来。还挺坑的。
