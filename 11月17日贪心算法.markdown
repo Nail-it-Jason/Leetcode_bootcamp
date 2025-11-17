@@ -1,0 +1,71 @@
+#### 455.分发饼干
+
+```c++
+class Solution {
+public:
+    int findContentChildren(vector<int>& g, vector<int>& s) {
+        if(s.size() == 0) return 0;
+        int count = 0;
+        sort(g.begin(), g.end());
+        sort(s.begin(), s.end());
+        int j = s.size() - 1;
+        for(int i = g.size() - 1; i >= 0; --i){
+            if(j >= 0 && g[i] <= s[j]){
+                ++count;
+                --j;
+            }
+        }
+        return count;
+    }
+};
+```
+
+这道题注意几个点，首先我们要处理一下s为空的情况，否则访问非法索引了，另外在被动遍历j的时候也要注意j的范围不能到-1.最后注意我们一定是遍历胃口而不是遍历饼干，如果遍历饼干很可能会卡在最大的胃口那里，应该是大胃口不行再去尝试小胃口。
+
+#### 376.摆动序列
+
+```c++
+class Solution {
+public:
+    int wiggleMaxLength(vector<int>& nums) {
+        if(nums.size() <= 1) return nums.size();
+        int result = 1;
+        int predif = 0;
+        int curdif = 0;
+        for(int i = 0; i < nums.size() - 1; ++i){
+            curdif = nums[i + 1] - nums[i];
+            if(predif <= 0 && curdif > 0 ||
+               curdif < 0 && predif >= 0){
+                ++result;
+                predif = curdif;
+               }
+        }
+        return result;
+    }
+};
+```
+
+这里注意一下，如果都是删除左边的平坡，那我们等号都要给到左边的，predif。
+
+#### 53.最大子数组和
+
+```c++
+class Solution {
+public:
+    int maxSubArray(vector<int>& nums) {
+        if(nums.size() == 1) return nums[0];
+        int result = INT32_MIN;
+        int curSum = 0;
+        int pos = 0;
+        while(pos != nums.size()){
+            curSum += nums[pos];
+            result = (curSum > result ? curSum : result);
+            if(curSum < 0) curSum = 0;
+            ++pos;
+        }
+        return result;
+    }
+};
+```
+
+我记得这是算法导论上的一道经典例题。大致思想就是一旦curSum为负了，我们就整组丢弃，另外每次都要及时保存目前的最大值。我们还需要考虑如果都是负数数组，我们能否只留下那个绝对值最小的负数作为结果，实际上在这个实现里，每次curSum都只有一个负值，并且result的三元运算机制也会确保最终得到的就是那个最大的负数。
