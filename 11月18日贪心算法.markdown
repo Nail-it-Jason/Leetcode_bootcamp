@@ -1,169 +1,94 @@
-#### 134. 加油站
+#### 122.买卖股票的最佳时机II
 
 ```c++
 class Solution {
 public:
-    int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {
-        int curSum = 0, min = INT32_MAX;
-        for(int i = 0; i < gas.size(); ++i){
-            int rest = gas[i] - cost[i];
-            curSum += rest;
-            min = (curSum < min ? curSum : min);
-        }
-        //情况一 gas < cost 不可能
-        if (curSum < 0) return -1;
-        //情况二 剩的油，最小值>0
-        if (min >= 0) return 0;
-        //情况三 剩的油<0，从后往前补，哪里补平就从哪里开始
-        for(int i = gas.size()-1; i >= 0; --i){
-            int rest = gas[i] - cost[i];
-            min += rest;
-            if(min >= 0)
-                return i;
-        }
-        return -1;
-    }
-
-};
-```
-
-要点：写的时候注意一下min的更新不是根据rest，而是根据curSum，因为就算rest是负的，但是上一波余量足够的话也不影响，
-
-这道题其实充要条件就是看油量和耗油量的总量是否平衡，所以不需要两次循环
-
-```c++
-class Solution {
-public:
-    int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {
-        int curSum = 0, min = INT32_MAX, minIdx = -1;
-        for(int i = 0; i < gas.size(); ++i){
-            int rest = gas[i] - cost[i];
-            curSum += rest;
-            if(curSum < min){
-                minIdx = i;
-                min = curSum;
-            }
-        }
-        //情况一 gas < cost 不可能
-        if (curSum < 0) return -1;
-        //情况二 剩的油，最小值>0
-        if (min >= 0) return 0;
-        return (minIdx + 1) % gas.size();
-    }
-
-};
-```
-
-#### 135.分发糖果
-
-```c++
-class Solution {
-public:
-    int candy(vector<int>& ratings) {
-        vector<int> candysend(ratings.size(), 1);
-        for(int i = 1; i < ratings.size(); ++i){
-            if(ratings[i] > ratings[i-1])
-                candysend[i] = candysend[i-1]+1;
-        }
-        for(int i = ratings.size() - 1; i >= 1; --i){
-            if(ratings[i-1] > ratings[i])
-                candysend[i-1] = max(candysend[i-1], candysend[i]+1);
-        }
-        for(int i = 1; i < candysend.size(); ++i)
-            candysend[i] += candysend[i-1];
-        return candysend[candysend.size() - 1];
-    }
-};
-```
-
-先从左往右，再从右往左，取两个结果的最大值就可以保证左边方向满足，右边方向也满足。感觉还不是特别理解。。
-
-#### 860.柠檬水找零
-
-```c++
-class Solution {
-public:
-    bool lemonadeChange(vector<int>& bills) {
-        int changes[3] = {0};
-        for(int i = 0; i < bills.size(); ++i){
-            switch(bills[i]){
-                case 5:
-                    ++changes[0];
-                    break;
-                case 10:
-                    ++changes[1];
-                    if(changes[0] == 0) return false;
-                    else{
-                        --changes[0];
-                    }
-                    break;
-                case 20:
-                    ++changes[2];// 优先找10+5，不行再找3*5
-                    if(changes[1] >= 1 && changes[0] >= 1){
-                        --changes[0];
-                        --changes[1];
-                    }
-                    else if(changes[0] >= 3){
-                        changes[0] -= 3;
-                    }
-                    else return false;
-                    break;
-                default:
-                    break;
-            }
-        }
-        return true;
-    }
-};
-```
-
-这道题贪心的点在于我们优先保留五元的，优先用10元去找。
-
-#### 406.根据身高重建队列
-
-```c++
-class Solution {
-public:
-    static bool cmp(vector<int>& a, vector<int>& b){
-        if(a[0] == b[0]) return a[1] < b[1];
-        return a[0] > b[0];
-    }
-    vector<vector<int>> reconstructQueue(vector<vector<int>>& people) {
-        sort(people.begin(), people.end(), cmp);
-        vector<vector<int>> ans;
-        for(int i = 0; i < people.size(); ++i){
-            int index = people[i][1];
-            ans.insert(ans.begin()+index, people[i]);
+    int maxProfit(vector<int>& prices) {
+        int ans = 0;
+        for(int i = 1; i < prices.size(); ++i){
+            if(prices[i] > prices[i-1])
+                ans += (prices[i] - prices[i-1]);
         }
         return ans;
     }
 };
 ```
 
-先按照身高排序，然后相同身高前面人数少的优先。然后直接插入就可以了。
+这也叫中等题。。。？
+
+#### 55.跳跃游戏
 
 ```c++
 class Solution {
 public:
-    // 身高从大到小排（身高相同k小的站前面）
-    static bool cmp(const vector<int>& a, const vector<int>& b) {
-        if (a[0] == b[0]) return a[1] < b[1];
-        return a[0] > b[0];
-    }
-    vector<vector<int>> reconstructQueue(vector<vector<int>>& people) {
-        sort (people.begin(), people.end(), cmp);
-        list<vector<int>> que; // list底层是链表实现，插入效率比vector高的多
-        for (int i = 0; i < people.size(); i++) {
-            int position = people[i][1]; // 插入到下标为position的位置
-            std::list<vector<int>>::iterator it = que.begin();
-            while (position--) { // 寻找在插入位置
-                it++;
-            }
-            que.insert(it, people[i]);
+    bool canJump(vector<int>& nums) {
+        if(nums.size() == 1) return true;
+        int cover = 0;
+        for(int i = 0; i <= cover && i < nums.size(); ++i){
+            cover = max(cover, nums[i] + i);
+            if(cover >= nums.size() - 1) return true;
         }
-        return vector<vector<int>>(que.begin(), que.end());
+        return false;
     }
 };
 ```
 
-也可以使用链表，这样插入每次只需要$O(n)$。
+这题我一开始写的是for循环里```i < nums.size()```，但是这样是不完善的，因为这样的话i一定会走到头，但是实际情况是我们不一定会走到头。
+
+#### 45.跳跃游戏II
+
+```c++
+class Solution {
+public:
+    int jump(vector<int>& nums) {
+        if(nums.size() == 1) return 0;
+        int step = 0;
+        int cover = 0;
+        int nextcover = 0;
+        for(int i = 0; i < nums.size(); ++i){
+            nextcover = max(nextcover, i + nums[i]);
+            if(i == cover){
+                ++step;
+                cover = nextcover;
+                if(nextcover >= nums.size() - 1) break;
+            }
+        }
+        return step;
+    }
+};
+```
+
+大概思想就是，nextcover负责处理我在当前cover下的每一个选择所能到达的最远距离。如果i走到了当前cover那么我们一定要真正的往前走一步了。
+
+#### 1005.K次取反后最大化的数组和
+
+```c++
+class Solution {
+public:
+    static bool cmp(int& a, int& b){
+        return abs(a) > abs(b);
+    }
+    int largestSumAfterKNegations(vector<int>& nums, int k) {
+        sort(nums.begin(), nums.end(), cmp);
+        for(int i = 0; i < nums.size(); ++i){
+            if(nums[i] < 0){
+                --k;
+                nums[i] = -nums[i];
+            }
+            if(k == 0) break;
+        }
+        while(k > 0){
+            nums[nums.size() - 1] = -nums[nums.size() - 1];
+            --k;
+        }
+        int sum = 0;
+        for(auto& x : nums)
+            sum += x;
+        return sum;
+    }
+};
+```
+
+知道思路直接写，一遍过。首先按绝对值从大到小排序，然后先反转大的，如果k非常大，那就反复反转最后一个值，直到k的次数用完。
+
+```if (K % 2 == 1) A[A.size() - 1] *= -1; ```其实不用写一个循环来反转，直接用奇偶性做一下就行。
