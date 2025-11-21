@@ -1,0 +1,55 @@
+#### 56.合并区间
+
+```c++
+class Solution {
+public:
+    static bool cmp(const vector<int>& a, const vector<int>& b){
+        return a[0] < b[0];//按左边界从小到大排列
+    }
+    vector<vector<int>> merge(vector<vector<int>>& intervals) {
+        if(intervals.size() == 1) return intervals;
+        vector<vector<int>> ans;
+        sort(intervals.begin(), intervals.end(), cmp);
+        int begin = intervals[0][0], end = intervals[0][1];
+        for(int i = 1; i < intervals.size(); ++i){
+            if(intervals[i][0] <= end){
+                end = max(end, intervals[i][1]);
+            }
+            else{ //没办法重叠了
+                ans.push_back(vector<int>{begin, end});
+                begin = intervals[i][0];
+                end = intervals[i][1];
+            }
+        }
+        ans.push_back(vector<int>{begin, end});
+        return ans;
+    }
+};
+```
+
+首先检查重叠状态，看看新区间的左边界能不能踩进来，能的话就更新end范围，如果不能的话就代表需要新的区间了，把旧区间存下来。但是有个问题就是最后更改的那个begin和end也需要存入，因此在for循环外面做一下就可以了。
+
+#### 738.单调递增的数字
+
+```c++
+class Solution {
+public:
+    int monotoneIncreasingDigits(int n) {
+        //从后往前遍历，碰到前面的数更大，就减到相等然后后面的改成9
+        string strNum = to_string(n);
+        int flag = strNum.size();
+        for(int i = strNum.size() - 1; i >= 1; --i){
+            if(strNum[i - 1] > strNum[i]){
+                flag = i;
+                strNum[i - 1]--;
+            }
+        }
+        for(int i = flag; i < strNum.size(); ++i){
+            strNum[i] = '9';
+        }
+        return stoi(strNum);
+    }
+};
+```
+
+一开始我尝试使用纯数字计算，发现比较绕而且不好统一设置为9，并且进位问题也比较难受。所以这种情况下还是使用字符串，可以很方便的统一设置为9，并且不需要担心进位问题，因为字符串‘0’就算减了1，仍然是合法的，并且可以跟前面比较。
