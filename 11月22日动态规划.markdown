@@ -1,0 +1,123 @@
+#### 509.斐波那契数
+
+```c++
+class Solution {
+public:
+    int fib(int n) {
+        if(n == 0 || n == 1) return n;
+        else return (fib(n-1) + fib(n-2));
+    }
+};
+```
+
+直接用递归做了。
+
+dp就是建立一个数组然后根据递推关系导出结果值。
+
+```c++
+class Solution {
+public:
+    int fib(int n) {
+        if(n == 0 || n == 1) return n;
+        vector<int> dp(n + 1);
+        dp[0] = 0;
+        dp[1] = 1;
+        for(int i = 2; i <= n; ++i){
+            dp[i] = dp[i - 1] + dp[i - 2];
+        }
+        return dp[n];
+    }
+};
+```
+
+可以看出运行速度快了很多。
+
+#### 70.爬楼梯
+
+```c++
+class Solution {
+public:
+    int climbStairs(int n) {
+        //爬到第n层的方法数等于爬到第n-1层的方法数加上爬到第n-2层的方法数
+        if(n == 1) return 1;
+        if(n == 2) return 2;
+        vector<int> dp(n + 1);
+        dp[0] = 0; //我们不用这个
+        dp[1] = 1; //1种
+        dp[2] = 2; //2种
+        
+        for(int i = 3; i <= n; ++i){
+            dp[i] = dp[i - 1] + dp[i - 2];
+        }
+        return dp[n];
+    }
+};
+```
+
+见注释。
+
+```c++
+// 版本二
+class Solution {
+public:
+    int climbStairs(int n) {
+        if (n <= 1) return n;
+        int dp[3];
+        dp[1] = 1;
+        dp[2] = 2;
+        for (int i = 3; i <= n; i++) {
+            int sum = dp[1] + dp[2];
+            dp[1] = dp[2];
+            dp[2] = sum;
+        }
+        return dp[2];
+    }
+};
+
+```
+
+还有一个优化空间复杂度的方法，但是不太直观。
+
+#### 746.使用最小花费爬楼梯
+
+```c++
+class Solution {
+public:
+    int minCostClimbingStairs(vector<int>& cost) {
+        if(cost.size() == 2) return min(cost[0], cost[1]);
+        int sum = 0;
+        int pos = cost.size();
+        while(pos >= 2){
+            if(cost[pos - 1] < cost[pos - 2]){
+                sum += cost[pos - 1];
+                --pos;
+            }
+            else{
+                sum += cost[pos - 2];
+                pos -= 2;
+            }
+        }
+        return sum;
+    }
+};
+```
+
+❌这是一个错误的解法❌，我用了贪心的方法，但是无法避免这种```[0, 2, 2, 1]```。
+
+```c++
+class Solution {
+public:
+    int minCostClimbingStairs(vector<int>& cost) {
+        //到达第i阶台阶的最少体力是dp[i]
+        vector<int> dp(cost.size() + 1);
+        dp[0] = 0;
+        dp[1] = 0;
+        for(int i = 2; i < dp.size(); ++i){
+            dp[i] = min(dp[i - 1] + cost[i - 1], dp[i - 2] + cost[i - 2]);
+        }
+        return dp[cost.size()];
+    }
+};
+```
+
+这里注意一定要明确dp的含义，否则容易迷迷糊糊写不明白。
