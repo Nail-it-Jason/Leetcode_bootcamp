@@ -1,0 +1,71 @@
+#### 62.不同路径
+
+```c++
+class Solution {
+public:
+    int uniquePaths(int m, int n) {
+        //一共向右n-1，向下m-1，一共走m+n-2步，其中选择n-1或m-1步就可以，用组合公式即可
+        int N = m + n - 2;
+        int k = min(n - 1, m - 1);
+
+        long long int result = 1;
+        for(int i = k; i >= 1; --i){
+            result *= N;
+            --N;
+        }
+        for(int i = k; i >= 1; --i){
+            result /= i;
+        }
+        return result;
+    }
+};
+```
+
+用这个方法试了一下，发现long long也没办法收住。还是老老实实用dp的方法吧。
+
+```c++
+class Solution {
+public:
+    int uniquePaths(int m, int n) {
+        vector<vector<int>> dp(m, vector<int>(n, 1));
+        for(int i = 1; i < m; ++i){
+            for(int j = 1; j < n; ++j){
+                dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
+            }
+        }
+        return dp[m - 1][n - 1];
+    }
+};
+```
+
+dp在这道题是棋盘格子的具象化。
+
+#### 63.不同路径II
+
+```c++
+class Solution {
+public:
+    int uniquePathsWithObstacles(vector<vector<int>>& obstacleGrid) {
+        int m = obstacleGrid.size();
+        int n = obstacleGrid[0].size();
+        vector<vector<int>> dp(m, vector<int>(n, 0));
+        for(int i = 0; i < n; ++i){
+            if(obstacleGrid[0][i] == 0) dp[0][i] = 1;
+            else break;
+        }
+        for(int j = 0; j < m; ++j){
+            if(obstacleGrid[j][0] == 0) dp[j][0] = 1;
+            else break;
+        }
+        for(int i = 1; i < m; ++i){
+            for(int j = 1; j < n; ++j){
+                if(obstacleGrid[i][j] == 1) continue;
+                dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
+            }
+        }
+        return dp[m - 1][n - 1];
+    }
+};
+```
+
+这道题的方法类似。
