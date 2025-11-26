@@ -1,0 +1,113 @@
+#### 1049.最后一块石头的重量II
+
+```c++
+class Solution {
+public:
+    int lastStoneWeightII(vector<int>& stones) {
+        //分成两段大小差不多的，看最“差不多”的情形是什么样的，然后减一下
+        int sum = 0;
+        vector<int> dp(15001, 0);
+        for(auto &s : stones) sum += s;
+        int target = sum / 2;
+        for(int i = 0; i < stones.size(); ++i){
+            for(int j = target; j >= stones[i]; --j){
+                dp[j] = max(dp[j], dp[j - stones[i]] + stones[i]);
+            }
+        }
+        return sum - dp[target] * 2;
+    }
+};
+```
+
+本题思想：让背包尽可能装满sum/2这么多重量的石头。这样背包里的和背包外的石头重量接近。背包里的石头一定是小于等于sum/2的，所以另一半一定更多。我们用另一半减这一半得到结果。
+
+#### 494.目标和
+
+```c++
+class Solution {
+public:
+    int findTargetSumWays(vector<int>& nums, int target) {
+        //我们把所有取负的分成一组，叫right，取正的叫left
+        //那么left-right=target, left+right=sum
+        //我们选取一些结果构成left即可，left=(target+sum)/2
+        int sum = 0;
+        for(auto& n : nums)
+            sum += n;
+        if(abs(target) > sum) return 0;
+        if((target + sum) % 2 == 1) return 0;
+        int real_target = (target + sum) / 2;
+        //二维dp，每行表示一个数据，每列表示一个容量，值是达到此容量的方法数
+        vector<vector<int>> dp(nums.size(), vector<int>(real_target + 1, 0));
+        //第0列一定是1，因为容量为0的背包都是“不放”
+        if(nums[0] <= real_target) dp[0][nums[0]] = 1;
+        int numZero = 0;
+        for(int i = 0; i < nums.size(); ++i){
+            if(nums[i] == 0) ++numZero;
+            dp[i][0] = (int) pow(2, numZero);
+        }
+        for(int i = 1; i < nums.size(); ++i){
+            for(int j = 1; j <= real_target; ++j){ //情况数等于不放新的加上放新的
+                if(nums[i] > j) dp[i][j] = dp[i - 1][j];
+                else
+                    dp[i][j] = dp[i - 1][j] + dp[i - 1][j - nums[i]];
+            }
+        }
+        return dp[nums.size() - 1][real_target];
+    }
+};
+```
+
+这道题挺复杂的，有很多要考虑的地方。首先处理成背包问题，然后排除掉2个不可能情形。在初始化的时候，要考虑nums里面有没有0，有的话，第一列按指数规律初始化。在初始化第一行和处理每一行的时候，我们都要考察一下当前的备选数值会不会比当前的容量大。全写对，不是很容易。
+
+```c++
+class Solution {
+public:
+    int findTargetSumWays(vector<int>& nums, int target) {
+        int sum = 0;
+        for (int i = 0; i < nums.size(); i++) sum += nums[i];
+        if (abs(target) > sum) return 0; // 此时没有方案
+        if ((target + sum) % 2 == 1) return 0; // 此时没有方案
+        int bagSize = (target + sum) / 2;
+        vector<int> dp(bagSize + 1, 0);
+        dp[0] = 1;
+        for (int i = 0; i < nums.size(); i++) {
+            for (int j = bagSize; j >= nums[i]; j--) {
+                dp[j] += dp[j - nums[i]];
+            }
+        }
+        return dp[bagSize];
+    }
+};
+
+```
+
+改成一维dp以后，我们不需要考虑指数规律的选0的情况，也不需要考虑nums[i]是不是比当前的j大的情况。
+
+#### 474.一和零
+
+```c++
+class Solution {
+public:
+    int findMaxForm(vector<string>& strs, int m, int n) {
+        vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
+        for(auto &str : strs){
+            //统计0的个数和1的个数
+            int Zeros = 0, Ones = 0;
+            for(auto &ch : str){
+                if(ch == '0') ++Zeros;
+                else ++Ones;
+            }
+
+            //从大到小遍历容量
+            for(int i = m; i >= Zeros; --i){
+                for(int j = n; j >= Ones; --j){
+                    dp[i][j] = max(dp[i][j], dp[i - Zeros][j - Ones] + 1);
+                }
+            }
+        }
+        return dp[m][n];
+    }
+};
+```
+
+这里的dp的两个维度表示0和1的数量，外面循环则是处理每个字符串。
