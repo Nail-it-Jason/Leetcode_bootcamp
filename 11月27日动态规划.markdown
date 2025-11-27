@@ -1,0 +1,133 @@
+#### 卡码网52.携带研究材料
+
+```c++
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int main(){
+    int n, v; //种类，总重量
+    cin >> n >> v;
+    vector<int> weight(n, 0);
+    vector<int> value(n, 0);
+    for(int i = 0; i < n; ++i){
+        cin >> weight[i] >> value[i];
+    }
+
+    vector<vector<int>> dp(n, vector<int>(v + 1, 0));
+    for(int j = weight[0]; j <= v; ++j){
+        dp[0][j] = dp[0][j - weight[0]] + value[0];
+    }
+    for(int i = 1; i < n; ++i){
+        for(int j = 1; j <= v; ++j){
+            if(j < weight[i]) dp[i][j] = dp[i - 1][j];
+            else 
+                dp[i][j] = max(dp[i - 1][j], dp[i][j - weight[i]] + value[i]);
+        }
+    }
+    cout << dp[n - 1][v];
+    return 0;
+}
+```
+
+注意下标别写错了，但凡用到weight或者value数组的都要用i不要用j，这里容易笔误。
+
+#### 518.零钱兑换II
+
+```c++
+class Solution {
+public:
+    int change(int amount, vector<int>& coins) {
+        //dp数组表示迄今为止的组合数
+        vector<vector<uint64_t>> dp(coins.size(), vector<uint64_t>(amount + 1, 0));
+        //第一行，就用coins[0]来组成amount
+        for(int j = 0; j <= amount; ++j){
+            if(j % coins[0] == 0) dp[0][j] = 1;
+        }
+        for(int i = 0; i < coins.size(); ++i){
+            dp[i][0] = 1;
+        }
+        for(int i = 1; i < coins.size(); ++i){
+            for(int j = 1; j <= amount; ++j){
+                //方法数量等于不使用coin[i]的方法数量加上使用coin[i]的方法数量
+                //但是得保证当前的容量足够把coin[i]加进去
+                if(coins[i] > j) dp[i][j] = dp[i - 1][j];
+                else
+                    dp[i][j] = dp[i][j - coins[i]] + dp[i - 1][j];
+            }
+        }
+        return dp[coins.size() - 1][amount];
+    }
+};
+```
+
+这道题写的时候踩了很多坑。首先，第一列一定是1不是0.其次，只有uint64_t可以不溢出，哪怕long long都会溢出。
+
+```c++
+class Solution {
+public:
+    int change(int amount, vector<int>& coins) {
+        vector<uint64_t> dp(amount + 1, 0); // 防止相加数据超int
+        dp[0] = 1; // 只有一种方式达到0
+        for (int i = 0; i < coins.size(); i++) { // 遍历物品
+            for (int j = coins[i]; j <= amount; j++) { // 遍历背包
+                dp[j] += dp[j - coins[i]];
+            }
+        }
+        return dp[amount]; // 返回组合数
+    }
+};
+
+```
+
+一维dp注意遍历的顺序，我们一定是先遍历物品再遍历背包，否则每一轮循环，所有物品都会重复记录。
+
+#### 377.组合总和IV
+
+```c++
+class Solution {
+public:
+    int combinationSum4(vector<int>& nums, int target) {
+        vector<uint64_t> dp(target + 1, 0);
+        //外层循环遍历容量，内层遍历num
+        dp[0] = 1;
+        //先遍历列，再遍历行
+        for(int j = 0; j <= target; ++j){
+            for(int i = 0; i < nums.size(); ++i){
+                if(nums[i] <= j)
+                    dp[j] = dp[j - nums[i]] + dp[j];
+            }
+        }
+        return dp[target];
+    }
+};
+```
+
+这道题只能用一维dp，具体原因需要再想想。
+
+#### 卡码网57.爬楼梯
+
+```c++
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int main(){
+    int n, m;
+    cin >> n >> m;
+    // 建立一个数组从1到m
+    vector<int> nums(m, 0);
+    for(int i = 0; i < m; ++i)
+        nums[i] = i + 1;
+    vector<int> dp(n + 1, 0);
+    dp[0] = 1;
+    for(int j = 0; j <= n; ++j){
+        for(int i = 0; i < nums.size(); ++i)
+            if(j >= nums[i]) dp[j] += dp[j - nums[i]];
+    }
+    cout << dp[n];
+    return 0;
+}
+```
+
+这道题和上道题完全一样。
