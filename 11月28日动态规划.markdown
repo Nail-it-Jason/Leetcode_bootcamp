@@ -1,0 +1,84 @@
+#### 322.零钱兑换
+
+```c++
+class Solution {
+public:
+    int coinChange(vector<int>& coins, int amount) {
+        vector<int> dp(amount + 1, INT_MAX);
+        dp[0] = 0;
+        for(int i = 0; i < coins.size(); ++i){
+            for(int j = coins[i]; j <= amount; ++j){
+                if(dp[j - coins[i]] != INT_MAX)
+                    dp[j] = min(dp[j], dp[j - coins[i]] + 1);
+            }
+        }
+        return (dp[amount] == INT_MAX ? -1 : dp[amount]);
+    }
+};
+```
+
+注意这道题，INT_MAX表示无解。dp数组里可能无解和解共存，需要额外的判断。
+
+#### 279.完全平方数
+
+```c++
+class Solution {
+public:
+    int numSquares(int n) {
+        vector<int> nums(101, 0);
+        for(int i = 0; i < nums.size(); ++i)
+            nums[i] = i * i;
+        vector<int> dp(n + 1, INT_MAX);
+        dp[0] = 0;
+        for(int i = 1; i <= 100; ++i){
+            for(int j = nums[i]; j <= n; ++j){
+                if(dp[j - nums[i]] != INT_MAX)
+                    dp[j] = min(dp[j], dp[j - nums[i]] + 1);
+            }
+        }
+        return dp[n];
+    }
+};
+```
+
+和上一题思路类似，参考答案没有单独建立数组，所以会快一些。
+
+```c++
+class Solution {
+public:
+    int numSquares(int n) {
+        vector<int> dp(n + 1, INT_MAX);
+        dp[0] = 0;
+        for (int i = 1; i * i <= n; i++) { // 遍历物品
+            for (int j = i * i; j <= n; j++) { // 遍历背包
+                dp[j] = min(dp[j - i * i] + 1, dp[j]);
+            }
+        }
+        return dp[n];
+    }
+};
+```
+
+#### 139.单词拆分
+
+```c++
+class Solution {
+public:
+    bool wordBreak(string s, vector<string>& wordDict) {
+        unordered_set<string> words(wordDict.begin(), wordDict.end());
+        vector<bool> dp(s.size() + 1, false);
+        dp[0] = true;
+        for(int i = 1; i <= s.size(); ++i){
+            for(int j = 0; j < i; ++j){
+                string word = s.substr(j, i - j);
+                if(words.find(word) != words.end() && dp[j] == true){
+                    dp[i] = true;
+                }
+            }
+        }
+        return dp[s.size()];
+    }
+};
+```
+
+这道题的核心思想就是外循环写dp数组的最新位置，内循环则在i前面依次遍历，只要我们截出来的单词是有的，并且前面的路也是通的，那么整条路都是通的。
