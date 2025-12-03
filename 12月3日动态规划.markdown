@@ -1,0 +1,92 @@
+#### 300.最长递增子序列
+
+```c++
+class Solution {
+public:
+    int lengthOfLIS(vector<int>& nums) {
+        if(nums.size() == 1) return 1;
+        vector<int> dp(nums.size(), 1);
+        int result = 0;
+        for(int i = 1; i < nums.size(); ++i){
+            for(int j = 0; j < i; ++j){
+                if(nums[i] > nums[j]) dp[i] = max(dp[i], dp[j] + 1);
+            }
+            if(dp[i] > result) result = dp[i];
+        }
+        return result;
+    }
+};
+```
+
+外循环过的是以nums[i]结尾的最长子序列，这个结果是根据以j结尾的最长子序列构成的。
+
+#### 674.最长连续递增序列
+
+```c++
+class Solution {
+public:
+    int find(vector<int>& nums, int start, int end){
+        //闭区间
+        if(start == end) return 1;
+        int mid = (start + end) / 2;
+        int left = find(nums, start, mid);
+        int right = find(nums, mid + 1, end);
+        int count = 1, i = mid - 1, j = mid + 1;
+        while(i >= start && nums[i + 1] > nums[i]){
+            ++count; --i;
+        }
+        while(j <= end && nums[j] > nums[j - 1]){
+            ++count; ++j;
+        }
+        return max(count, max(left, right));
+    }
+    int findLengthOfLCIS(vector<int>& nums) {
+        if(nums.size() == 1) return 1;
+        //最长的递增子序列可以是左边的最长/右边的最长或者跨边界的最长
+        int result = find(nums, 0, nums.size() - 1);
+        return result;
+    }
+};
+```
+
+这题我用分而治之解了一下，还是闭区间比较好写一些。
+
+当然，dp的方法更容易想
+
+```c++
+class Solution {
+public:
+    int findLengthOfLCIS(vector<int>& nums) {
+        int result = 1;
+        vector<int> dp(nums.size(), 1);
+        for(int i = 1; i < nums.size(); ++i){
+            if(nums[i] > nums[i - 1])
+                dp[i] = dp[i - 1] + 1;
+            if(dp[i] > result) result = dp[i];
+        }
+        return result;
+    }
+};
+```
+
+#### 718.最长重复子数组
+
+```c++
+class Solution {
+public:
+    int findLength(vector<int>& nums1, vector<int>& nums2) {
+        vector<vector<int>> dp(nums1.size() + 1, vector<int>(nums2.size() + 1, 0));
+        int result = 0;
+        for(int i = 1; i <= nums1.size(); ++i){
+            for(int j = 1; j <= nums2.size(); ++j){
+                if(nums1[i - 1] == nums2[j - 1])
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                if(dp[i][j] > result) result = dp[i][j];
+            }
+        }
+        return result;
+    }
+};
+```
+
+这道题的dp的含义就是下标到i-1的nums1和下标到j-1的nums2数组的重叠长度。
