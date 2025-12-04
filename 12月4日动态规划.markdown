@@ -1,0 +1,91 @@
+#### 1143.最长公共子序列
+
+```c++
+class Solution {
+public:
+    int longestCommonSubsequence(string text1, string text2) {
+        int result = 0;
+        vector<vector<int>> dp(text1.size() + 1, vector<int>(text2.size() + 1, 0));
+        for(int i = 1; i <= text1.size(); ++i){
+            for(int j = 1; j <= text2.size(); ++j){
+                if(text1[i - 1] == text2[j - 1])
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                else
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
+                result = (dp[i][j] > result ? dp[i][j] : result);
+            }
+        }
+        return result;
+    }
+};
+```
+
+这里注意几点，不能写成```dp[i][j]++```，因为当前值一定是依赖于前面的值的。然后我这里把```else```下的写成了i-2和j-2，这是因为没有搞清楚dp数组的含义。
+
+#### 1035.不相交的线
+
+```c++
+class Solution {
+public:
+    int maxUncrossedLines(vector<int>& nums1, vector<int>& nums2) {
+        //dp数组是[0, i-1], [0, j-1]线的个数
+        int result = 0;
+        vector<vector<int>> dp(nums1.size() + 1, vector<int>(nums2.size() + 1, 0));
+        for(int i = 1; i <= nums1.size(); ++i){
+            for(int j = 1; j <= nums2.size(); ++j){
+                if(nums1[i - 1] == nums2[j - 1])
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                else
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
+                result = (dp[i][j] > result ? dp[i][j] : result);
+            }
+        }
+        return result;
+    }
+};
+```
+
+完全一毛一样一毛一样一毛一样。
+
+#### 53.最大子数组和
+
+```c++
+class Solution {
+public:
+    int maxSubArray(vector<int>& nums) {
+        if(nums.size() == 1) return nums[0];
+        int result = nums[0];
+        vector<int> dp(nums.size(), 0);
+        dp[0] = nums[0];
+        for(int i = 1; i < nums.size(); ++i){
+            dp[i] = max(dp[i - 1] + nums[i], nums[i]);
+            result = (dp[i] > result ? dp[i] : result);
+        }
+        return result;
+    }
+};
+```
+
+这里其实就是用dp数组代管贪心算法版本的curSum。另外需要注意一下result初始化不能是INT_MIN，否则的话会导致潜在的第一个值被忽略没有更新。
+
+#### 392.判断子序列
+
+```c++
+class Solution {
+public:
+    bool isSubsequence(string s, string t) {
+        vector<vector<int>> dp(s.size() + 1, vector<int>(t.size() + 1, 0));
+        for(int i = 1; i <= s.size(); ++i){
+            for(int j = 1; j <= t.size(); ++j){
+                if(s[i - 1] == t[j - 1])
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                else
+                    dp[i][j] = dp[i][j - 1];
+            }
+        }
+        return dp[s.size()][t.size()] == s.size();
+    }
+};
+```
+
+这个题的核心在于判断分支的情况，如果匹配就加一，否则继承的结果是i和j-1匹配的长度。
