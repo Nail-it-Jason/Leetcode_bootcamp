@@ -1,0 +1,78 @@
+#### 647.回文子串
+
+```c++
+class Solution {
+public:
+    int countSubstrings(string s) {
+        vector<vector<bool>> dp(s.size(), vector<bool>(s.size(), false));
+        int result = 0;
+        for(int i = s.size() - 1; i >= 0; --i){
+            for(int j = i; j < s.size(); ++j){
+                if(s[i] == s[j]){
+                    if(j - i <= 1){
+                        ++result; dp[i][j] = true;
+                    }
+                    else{
+                        if(dp[i + 1][j - 1] == true){
+                            ++result; dp[i][j] = true;
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+};
+```
+
+这题typo了，把==敲成\=了。注意方向，从下往上，从左往右。
+
+```c++
+class Solution {
+public:
+    int countSubstrings(string s) {
+        int result = 0;
+        for (int i = 0; i < s.size(); i++) {
+            result += extend(s, i, i, s.size()); // 以i为中心
+            result += extend(s, i, i + 1, s.size()); // 以i和i+1为中心
+        }
+        return result;
+    }
+    int extend(const string& s, int i, int j, int n) {
+        int res = 0;
+        while (i >= 0 && j < n && s[i] == s[j]) {
+            i--;
+            j++;
+            res++;
+        }
+        return res;
+    }
+};
+
+```
+
+还有中心扩展法，从每个下标开始往外扩。
+
+#### 516.最长回文子序列
+
+```c++
+class Solution {
+public:
+    int longestPalindromeSubseq(string s) {
+        vector<vector<int>> dp(s.size(), vector<int>(s.size(), 0));
+        for(int i = 0; i < s.size(); ++i)
+            dp[i][i] = 1;
+        for(int i = s.size() - 1; i >= 0; --i){
+            for(int j = i + 1; j < s.size(); ++j){
+                if(s[i] == s[j])
+                    dp[i][j] = dp[i + 1][j - 1] + 2;
+                else
+                    dp[i][j] = max(dp[i + 1][j], dp[i][j - 1]);
+            }
+        }
+        return dp[0][s.size() - 1];
+    }
+};
+```
+
+注意这里i和j相等是不能通过dp递推得到的，因此需要预先初始化。
