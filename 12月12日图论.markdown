@@ -1,0 +1,272 @@
+#### 卡码网101.孤岛的总面积
+
+```c++
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+int coord[4][2] = {0, 1, 0, -1, 1, 0, -1, 0};
+
+void dfs(vector<vector<int>>& grid, int x, int y){
+    grid[x][y] = 0;
+    for(int i = 0; i < 4; ++i){
+        int new_x = x + coord[i][0];
+        int new_y = y + coord[i][1];
+        if(new_x < 0 || new_x >= grid.size() ||
+        new_y < 0 || new_y >= grid[0].size())
+            continue;
+        if(grid[new_x][new_y] == 1)
+            dfs(grid, new_x, new_y);
+    }
+}
+
+int main(){
+    int N = 0, M = 0;
+    cin >> N >> M;
+
+    vector<vector<int>> grid(N, vector<int>(M, 0));
+    for(int i = 0; i < N; ++i){
+        for(int j = 0; j < M; ++j){
+            cin >> grid[i][j];
+        }
+    }
+
+    for(int i = 0; i < N; ++i){
+        if(grid[i][0] == 1) dfs(grid, i, 0);
+        if(grid[i][M - 1] == 1) dfs(grid, i, M - 1);
+    }
+
+    for(int j = 0; j < M; ++j){
+        if(grid[0][j] == 1) dfs(grid, 0, j);
+        if(grid[N - 1][j] == 1) dfs(grid, N - 1, j);
+    }
+
+    int area = 0;
+    for(int i = 0; i < N; ++i){
+        for(int j = 0; j < M; ++j){
+            if(grid[i][j] == 1) ++area;
+        }
+    }
+
+    cout << area << endl;
+
+    return 0;
+}
+```
+
+此题只需要一个数组即可，在这个基础上去改数组的值。
+
+#### 卡码网102.沉没孤岛
+
+```c++
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+int coord[4][2] = {0, 1, 0, -1, 1, 0, -1, 0};
+
+void dfs(vector<vector<int>>& grid, int x, int y){
+    grid[x][y] = 2;
+    for(int i = 0; i < 4; ++i){
+        int new_x = x + coord[i][0];
+        int new_y = y + coord[i][1];
+        if(new_x < 0 || new_x >= grid.size() ||
+        new_y < 0 || new_y >= grid[0].size())
+            continue;
+        if(grid[new_x][new_y] == 1)
+            dfs(grid, new_x, new_y);
+    }
+}
+
+int main(){
+    int N = 0, M = 0;
+    cin >> N >> M;
+
+    vector<vector<int>> grid(N, vector<int>(M, 0));
+    for(int i = 0; i < N; ++i){
+        for(int j = 0; j < M; ++j){
+            cin >> grid[i][j];
+        }
+    }
+
+    for(int i = 0; i < N; ++i){
+        if(grid[i][0] == 1) dfs(grid, i, 0);
+        if(grid[i][M - 1] == 1) dfs(grid, i, M - 1);
+    }
+
+    for(int j = 0; j < M; ++j){
+        if(grid[0][j] == 1) dfs(grid, 0, j);
+        if(grid[N - 1][j] == 1) dfs(grid, N - 1, j);
+    }
+
+
+    for(int i = 0; i < N; ++i){
+        for(int j = 0; j < M; ++j){
+            if(grid[i][j] == 1) grid[i][j] = 0;
+            if(grid[i][j] == 2) grid[i][j] = 1;
+        }
+    }
+
+    for(int i = 0; i < N; ++i){
+        for(int j = 0; j < M - 1; ++j){
+            cout << grid[i][j] << " ";
+        }
+        cout << grid[i][M - 1] << endl;
+    }
+
+
+    return 0;
+}
+```
+
+这题把边界先标记为2，然后把中心孤岛变为0，再把2变为1，输出即可。
+
+#### 卡码网103.水流问题
+
+```c++
+#include <iostream>
+#include <vector>
+using namespace std;
+int n, m;
+int dir[4][2] = {-1, 0, 0, -1, 1, 0, 0, 1};
+void dfs(vector<vector<int>>& grid, vector<vector<bool>>& visited, int x, int y) {
+    if (visited[x][y]) return;
+
+    visited[x][y] = true;
+
+    for (int i = 0; i < 4; i++) {
+        int nextx = x + dir[i][0];
+        int nexty = y + dir[i][1];
+        if (nextx < 0 || nextx >= n || nexty < 0 || nexty >= m) continue;
+        if (grid[x][y] > grid[nextx][nexty]) continue; // 注意：这里是从低向高遍历
+
+        dfs (grid, visited, nextx, nexty);
+    }
+    return;
+}
+
+
+
+int main() {
+
+    cin >> n >> m;
+    vector<vector<int>> grid(n, vector<int>(m, 0));
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            cin >> grid[i][j];
+        }
+    }
+    // 标记从第一组边界上的节点出发，可以遍历的节点
+    vector<vector<bool>> firstBorder(n, vector<bool>(m, false));
+
+    // 标记从第一组边界上的节点出发，可以遍历的节点
+    vector<vector<bool>> secondBorder(n, vector<bool>(m, false));
+
+    // 从最上和最下行的节点出发，向高处遍历
+    for (int i = 0; i < n; i++) {
+        dfs (grid, firstBorder, i, 0); // 遍历最左列，接触第一组边界
+        dfs (grid, secondBorder, i, m - 1); // 遍历最右列，接触第二组边界
+    }
+
+    // 从最左和最右列的节点出发，向高处遍历
+    for (int j = 0; j < m; j++) {
+        dfs (grid, firstBorder, 0, j); // 遍历最上行，接触第一组边界
+        dfs (grid, secondBorder, n - 1, j); // 遍历最下行，接触第二组边界
+    }
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            // 如果这个节点，从第一组边界和第二组边界出发都遍历过，就是结果
+            if (firstBorder[i][j] && secondBorder[i][j]) cout << i << " " << j << endl;;
+        }
+    }
+
+
+}
+```
+
+不能一个点一个点遍历，复杂度太高了，我们只从四个边界开始做dfs可以避免重复计算。
+
+#### 卡码网104.建造最大岛屿
+
+```c++
+#include <iostream>
+#include <vector>
+#include <unordered_set>
+#include <unordered_map>
+using namespace std;
+int n, m;
+int count;
+
+int dir[4][2] = {0, 1, 1, 0, -1, 0, 0, -1}; // 四个方向
+void dfs(vector<vector<int>>& grid, vector<vector<bool>>& visited, int x, int y, int mark) {
+    if (visited[x][y] || grid[x][y] == 0) return; // 终止条件：访问过的节点 或者 遇到海水
+    visited[x][y] = true; // 标记访问过
+    grid[x][y] = mark; // 给陆地标记新标签
+    count++;
+    for (int i = 0; i < 4; i++) {
+        int nextx = x + dir[i][0];
+        int nexty = y + dir[i][1];
+        if (nextx < 0 || nextx >= n || nexty < 0 || nexty >= m) continue;  // 越界了，直接跳过
+        dfs(grid, visited, nextx, nexty, mark);
+    }
+}
+
+int main() {
+    cin >> n >> m;
+    vector<vector<int>> grid(n, vector<int>(m, 0));
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            cin >> grid[i][j];
+        }
+    }
+    vector<vector<bool>> visited(n, vector<bool>(m, false)); // 标记访问过的点
+    unordered_map<int ,int> gridNum;
+    int mark = 2; // 记录每个岛屿的编号
+    bool isAllGrid = true; // 标记是否整个地图都是陆地
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (grid[i][j] == 0) isAllGrid = false;
+            if (!visited[i][j] && grid[i][j] == 1) {
+                count = 0;
+                dfs(grid, visited, i, j, mark); // 将与其链接的陆地都标记上 true
+                gridNum[mark] = count; // 记录每一个岛屿的面积
+                mark++; // 记录下一个岛屿编号
+            }
+        }
+    }
+    if (isAllGrid) {
+        cout << n * m << endl; // 如果都是陆地，返回全面积
+        return 0; // 结束程序
+    }
+
+    // 以下逻辑是根据添加陆地的位置，计算周边岛屿面积之和
+    int result = 0; // 记录最后结果
+    unordered_set<int> visitedGrid; // 标记访问过的岛屿
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            count = 1; // 记录连接之后的岛屿数量
+            visitedGrid.clear(); // 每次使用时，清空
+            if (grid[i][j] == 0) {
+                for (int k = 0; k < 4; k++) {
+                    int neari = i + dir[k][1]; // 计算相邻坐标
+                    int nearj = j + dir[k][0];
+                    if (neari < 0 || neari >= n || nearj < 0 || nearj >= m) continue;
+                    if (visitedGrid.count(grid[neari][nearj])) continue; // 添加过的岛屿不要重复添加
+                    // 把相邻四面的岛屿数量加起来
+                    count += gridNum[grid[neari][nearj]];
+                    visitedGrid.insert(grid[neari][nearj]); // 标记该岛屿已经添加过
+                }
+            }
+            result = max(result, count);
+        }
+    }
+    cout << result << endl;
+
+}
+
+```
+
