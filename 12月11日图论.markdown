@@ -1,0 +1,183 @@
+#### 卡码网99.计数孤岛
+
+```c++
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+int direct[4][2] = {1, 0, -1, 0, 0, 1, 0, -1};
+
+void dfs(const vector<vector<int>> &map, vector<vector<bool>> &visited, int x, int y){
+    //x：行，y：列
+    for(int i = 0; i < 4; ++i){
+        int next_x = x + direct[i][0];
+        int next_y = y + direct[i][1];
+        if(next_x < 0 || next_x >= map.size() ||
+        next_y < 0 || next_y >= map[0].size())
+            continue;
+        if(!visited[next_x][next_y] && map[next_x][next_y] == 1){
+            visited[next_x][next_y] = true;
+            dfs(map, visited, next_x, next_y);
+        }
+    }
+}
+
+int main(){
+    int N = 0, M = 0;
+    cin >> N >> M;
+    vector<vector<int>> map_(N, vector<int>(M, 0));
+    vector<vector<bool>> visited(N, vector<bool>(M, false));
+
+    for(int i = 0; i < N; ++i){
+        for(int j = 0; j < M; ++j){
+            cin >> map_[i][j];
+        }
+    }
+
+    int result = 0;
+
+    for(int i = 0; i < N; ++i){
+        for(int j = 0; j < M; ++j){
+            if(!visited[i][j] && map_[i][j] == 1){
+                visited[i][j] = true;
+                ++result;
+                dfs(map_, visited, i, j);
+            }
+        }
+    }
+
+    cout << result << endl;
+    return 0;
+}
+```
+
+自己写的时候注意几点，主函数的循环是找新小岛，然后把标记剩余此小岛部分的任务交给dfs去做，这表明dfs也需要不断标记visited数组。
+
+```c++
+#include <iostream>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+int direct[4][2] = {1, 0, -1, 0, 0, 1, 0, -1};
+
+void bfs(const vector<vector<int>> &map, vector<vector<bool>> &visited, int x, int y){
+    queue<pair<int, int>> q;
+    q.push({x, y});
+    visited[x][y] = true;
+    while(!q.empty()){
+        auto cur = q.front();
+        q.pop();
+        int cur_x = cur.first;
+        int cur_y = cur.second;
+        for(int i = 0; i < 4; ++i){
+            int new_x = cur_x + direct[i][0];
+            int new_y = cur_y + direct[i][1];
+            if(new_x < 0 || new_x >= map.size() ||
+            new_y < 0 || new_y >= map[0].size())
+                continue;
+            if(!visited[new_x][new_y] && map[new_x][new_y] == 1){
+                q.push({new_x, new_y});
+                visited[new_x][new_y] = true;
+            }
+        }
+    }
+}
+
+int main(){
+    int N = 0, M = 0;
+    cin >> N >> M;
+    vector<vector<int>> map_(N, vector<int>(M, 0));
+    vector<vector<bool>> visited(N, vector<bool>(M, false));
+
+    for(int i = 0; i < N; ++i){
+        for(int j = 0; j < M; ++j){
+            cin >> map_[i][j];
+        }
+    }
+
+    int result = 0;
+
+    for(int i = 0; i < N; ++i){
+        for(int j = 0; j < M; ++j){
+            if(!visited[i][j] && map_[i][j] == 1){
+                visited[i][j] = true;
+                ++result;
+                bfs(map_, visited, i, j);
+            }
+        }
+    }
+
+    cout << result << endl;
+    return 0;
+}
+```
+
+BFS写法在这里，注意要点就是每次加入队列以后立即标记visited数组，避免重复搬运数据造成超时。
+
+#### 卡码网100.最大岛屿的面积
+
+```c++
+#include <iostream>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+int direct[4][2] = {1, 0, -1, 0, 0, 1, 0, -1};
+int count;
+void bfs(const vector<vector<int>> &map, vector<vector<bool>> &visited, int x, int y){
+    queue<pair<int, int>> q;
+    q.push({x, y});
+    visited[x][y] = true;
+    while(!q.empty()){
+        auto cur = q.front();
+        q.pop();
+        int cur_x = cur.first;
+        int cur_y = cur.second;
+        for(int i = 0; i < 4; ++i){
+            int new_x = cur_x + direct[i][0];
+            int new_y = cur_y + direct[i][1];
+            if(new_x < 0 || new_x >= map.size() ||
+            new_y < 0 || new_y >= map[0].size())
+                continue;
+            if(!visited[new_x][new_y] && map[new_x][new_y] == 1){
+                q.push({new_x, new_y});
+                visited[new_x][new_y] = true;
+                ++count;
+            }
+        }
+    }
+}
+
+int main(){
+    int N = 0, M = 0;
+    cin >> N >> M;
+    vector<vector<int>> map_(N, vector<int>(M, 0));
+    vector<vector<bool>> visited(N, vector<bool>(M, false));
+
+    for(int i = 0; i < N; ++i){
+        for(int j = 0; j < M; ++j){
+            cin >> map_[i][j];
+        }
+    }
+    int result = 0;
+    for(int i = 0; i < N; ++i){
+        for(int j = 0; j < M; ++j){
+            if(!visited[i][j] && map_[i][j] == 1){
+                visited[i][j] = true;
+                count = 1;
+                bfs(map_, visited, i, j);
+                result = max(result, count);
+            }
+        }
+    }
+
+    cout << result << endl;
+    return 0;
+}
+```
+
+以上，稍做改动即可，DFS同理。
